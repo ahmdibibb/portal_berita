@@ -5,14 +5,11 @@ import { PopularNews } from "@/components/popular-news"
 
 export default function HomePage() {
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-8">
       <HeroSection />
 
-      <div className="mt-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Berita Terkini</h2>
-          <div className="text-sm text-gray-500">Diperbarui setiap hari</div>
-        </div>
+      <div className="mt-12">
+        <h2 className="text-3xl font-bold mb-6">Berita Terkini</h2>
         <CategoryTabs />
         <NewsGrid />
       </div>
