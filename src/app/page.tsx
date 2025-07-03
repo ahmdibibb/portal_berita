@@ -1,7 +1,6 @@
-import { NewsGrid } from "@/components/news-grid"
-import { CategoryTabs } from "@/components/category-tabs"
-import { HeroSection } from "@/components/hero-section"
-import { PopularNews } from "@/components/popular-news"
+import { NewsGrid } from "@/components/news-grid";
+import { HeroSection } from "@/components/hero-section";
+import { PopularNews } from "@/components/popular-news";
 
 export default function HomePage() {
   return (
@@ -13,7 +12,6 @@ export default function HomePage() {
           <h2 className="text-2xl font-bold text-gray-900">Berita Terkini</h2>
           <div className="text-sm text-gray-500">Diperbarui setiap hari</div>
         </div>
-        <CategoryTabs />
         <NewsGrid />
       </div>
 
@@ -21,5 +19,5 @@ export default function HomePage() {
         <PopularNews />
       </div>
     </div>
-  )
+  );
 }
