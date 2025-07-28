@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/hooks/use-auth"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { MessageCircle, Send } from "lucide-react"
 import type { Comment } from "@/lib/mock-data"
 
@@ -21,7 +21,6 @@ export function CommentSection({ newsId }: CommentSectionProps) {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const { user } = useAuth()
-  const { toast } = useToast()
 
   useEffect(() => {
     fetchComments()
@@ -45,11 +44,7 @@ export function CommentSection({ newsId }: CommentSectionProps) {
     e.preventDefault()
 
     if (!user) {
-      toast({
-        title: "Login diperlukan",
-        description: "Silakan login untuk memberikan komentar",
-        variant: "destructive",
-      })
+      toast.error("Login diperlukan")
       return
     }
 
@@ -70,17 +65,10 @@ export function CommentSection({ newsId }: CommentSectionProps) {
         const comment = await response.json()
         setComments((prev) => [...prev, comment])
         setNewComment("")
-        toast({
-          title: "Komentar berhasil ditambahkan",
-          description: "Terima kasih atas komentar Anda",
-        })
+        toast.success("Komentar berhasil ditambahkan")
       }
     } catch (error) {
-      toast({
-        title: "Gagal menambahkan komentar",
-        description: "Silakan coba lagi",
-        variant: "destructive",
-      })
+      toast.error("Gagal menambahkan komentar")
     } finally {
       setSubmitting(false)
     }

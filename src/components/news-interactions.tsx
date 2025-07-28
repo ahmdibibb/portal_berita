@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/use-auth"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { Heart, Bookmark, Share2 } from "lucide-react"
 
 interface NewsInteractionsProps {
@@ -15,43 +15,28 @@ export function NewsInteractions({ newsId }: NewsInteractionsProps) {
   const [isSaved, setIsSaved] = useState(false)
   const [likes, setLikes] = useState(156)
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const handleLike = () => {
     if (!user) {
-      toast({
-        title: "Login diperlukan",
-        description: "Silakan login untuk menyukai berita",
-        variant: "destructive",
-      })
+      toast.error("Login diperlukan")
       return
     }
 
     setIsLiked(!isLiked)
     setLikes((prev) => (isLiked ? prev - 1 : prev + 1))
 
-    toast({
-      title: isLiked ? "Batal menyukai" : "Menyukai berita",
-      description: isLiked ? "Berita dihapus dari favorit" : "Berita ditambahkan ke favorit",
-    })
+    toast.success(isLiked ? "Batal menyukai" : "Menyukai berita")
   }
 
   const handleSave = () => {
     if (!user) {
-      toast({
-        title: "Login diperlukan",
-        description: "Silakan login untuk menyimpan berita",
-        variant: "destructive",
-      })
+      toast.error("Login diperlukan")
       return
     }
 
     setIsSaved(!isSaved)
 
-    toast({
-      title: isSaved ? "Batal menyimpan" : "Menyimpan berita",
-      description: isSaved ? "Berita dihapus dari daftar simpan" : "Berita disimpan untuk dibaca nanti",
-    })
+    toast.success(isSaved ? "Batal menyimpan" : "Menyimpan berita")
   }
 
   const handleShare = async () => {
@@ -68,10 +53,7 @@ export function NewsInteractions({ newsId }: NewsInteractionsProps) {
     } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href)
-      toast({
-        title: "Link disalin",
-        description: "Link berita telah disalin ke clipboard",
-      })
+      toast.success("Link disalin")
     }
   }
 

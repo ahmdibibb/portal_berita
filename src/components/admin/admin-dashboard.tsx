@@ -4,30 +4,75 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { PlusCircle, FileText, Users, Eye, MessageCircle } from "lucide-react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
+
+interface DashboardStats {
+  totalNews: number
+  totalUsers: number
+  totalViews: number
+  totalComments: number
+}
+
+interface RecentActivity {
+  type: string
+  message: string
+  timestamp: string
+}
 
 export function AdminDashboard() {
-  const stats = [
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [activities, setActivities] = useState<RecentActivity[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true)
+        
+        // Fetch stats
+        const statsResponse = await fetch('/api/admin/dashboard/stats')
+        if (!statsResponse.ok) throw new Error("Failed to fetch stats")
+        const statsData = await statsResponse.json()
+        setStats(statsData)
+        
+        // Fetch recent activities
+        const activitiesResponse = await fetch('/api/admin/dashboard/activities')
+        if (!activitiesResponse.ok) throw new Error("Failed to fetch activities")
+        const activitiesData = await activitiesResponse.json()
+        setActivities(activitiesData)
+      } catch (error) {
+        toast.error("Gagal memuat data dashboard")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDashboardData()
+  }, [])
+
+  const statsData = [
     {
       title: "Total Berita",
-      value: "156",
+      value: stats?.totalNews?.toString() || "-",
       description: "Berita yang telah dipublikasi",
       icon: FileText,
     },
     {
       title: "Total Pengguna",
-      value: "1,234",
+      value: stats?.totalUsers?.toString() || "-",
       description: "Pengguna terdaftar",
       icon: Users,
     },
     {
       title: "Total Views",
-      value: "45,678",
+      value: stats?.totalViews?.toString() || "-",
       description: "Total pembaca bulan ini",
       icon: Eye,
     },
     {
       title: "Total Komentar",
-      value: "2,345",
+      value: stats?.totalComments?.toString() || "-",
       description: "Komentar dari pengguna",
       icon: MessageCircle,
     },
@@ -49,11 +94,17 @@ export function AdminDashboard() {
         <Button variant="outline" asChild>
           <Link href="/admin/users">Kelola Pengguna</Link>
         </Button>
+        <Button variant="outline" asChild>
+          <Link href="/admin/comments">Kelola Komentar</Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/admin/likes">Kelola Like</Link>
+        </Button>
       </div>
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
+        {statsData.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
@@ -75,27 +126,26 @@ export function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Berita baru dipublikasi</p>
-                <p className="text-xs text-muted-foreground">2 jam yang lalu</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Pengguna baru mendaftar</p>
-                <p className="text-xs text-muted-foreground">4 jam yang lalu</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Komentar baru ditambahkan</p>
-                <p className="text-xs text-muted-foreground">6 jam yang lalu</p>
-              </div>
-            </div>
+            {loading && activities.length === 0 ? (
+              <p>Memuat aktivitas...</p>
+            ) : activities.length > 0 ? (
+              activities.map((activity, index) => (
+                <div key={index} className="flex items-center space-x-4">
+                  <div className={`w-2 h-2 rounded-full ${
+                    activity.type === 'news' ? 'bg-green-500' : 
+                    activity.type === 'user' ? 'bg-blue-500' : 'bg-yellow-500'
+                  }`}></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{activity.message}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(activity.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>Tidak ada aktivitas terbaru</p>
+            )}
           </div>
         </CardContent>
       </Card>

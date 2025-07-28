@@ -5,10 +5,18 @@ import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { News } from "@/lib/mock-data"
+
 
 interface RelatedNewsProps {
   newsId: string
+}
+
+type News = {
+  id: string | number
+  title: string
+  image?: string
+  category?: string
+  publishedAt?: string
 }
 
 export function RelatedNews({ newsId }: RelatedNewsProps) {

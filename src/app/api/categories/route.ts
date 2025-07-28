@@ -1,13 +1,24 @@
-import { NextResponse } from "next/server"
+// app/api/admin/categories/route.ts
+import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { requireAuth } from "@/lib/auth"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const [rows] = await db.execute("SELECT id, name, slug, description FROM categories ORDER BY name")
+    const auth = requireAuth(request)
+    
+    if (!auth || auth.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
-    return NextResponse.json(rows)
+    const [categories] = await db.execute("SELECT id, name FROM categories")
+    
+    return NextResponse.json(categories)
   } catch (error) {
-    console.error("Fetch categories error:", error)
-    return NextResponse.json({ error: "Gagal mengambil kategori" }, { status: 500 })
+    console.error("Get categories error:", error)
+    return NextResponse.json(
+      { error: "Failed to fetch categories" },
+      { status: 500 }
+    )
   }
 }

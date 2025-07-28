@@ -5,10 +5,22 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Clock, Eye, User } from "lucide-react"
-import type { News } from "@/lib/mock-data"
+
 
 interface NewsDetailProps {
   newsId: string
+}
+
+type News = {
+  image: string
+  id: string
+  title: string
+  content: string
+  category: string
+  author: string
+  publishedAt: string
+  imageUrl?: string
+  views?: number
 }
 
 export function NewsDetail({ newsId }: NewsDetailProps) {
