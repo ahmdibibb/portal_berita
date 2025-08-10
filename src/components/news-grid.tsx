@@ -1,115 +1,87 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { NewsCard } from "@/components/news-card"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useState, useEffect } from "react";
+import { NewsCard } from "@/components/news-card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface News {
-  id: number
-  title: string
-  excerpt: string
-  category: string
-  image: string
-  publishedAt: string
-  author: string
-  likes: number
-  comments: number
+  id: number;
+  title: string;
+  excerpt: string;
+  category: string;
+  image: string | null;
+  publishedAt: string | null;
+  author: string;
+  likes: number;
+  comments: number;
 }
 
-export function NewsGrid() {
-  const [news, setNews] = useState<News[]>([])
-  const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
+interface NewsGridProps {
+  category?: string;
+}
 
-  // Mock data - replace with actual API call
-  const mockNews: News[] = [
-    {
-      id: 1,
-      title: "Perkembangan Olahraga Nasional Mencapai Prestasi Gemilang",
-      excerpt: "Tim nasional berhasil meraih medali emas dalam kompetisi internasional...",
-      category: "Olahraga",
-      image: "/placeholder.svg?height=200&width=300",
-      publishedAt: "2024-01-15",
-      author: "Jane Smith",
-      likes: 45,
-      comments: 12,
-    },
-    {
-      id: 2,
-      title: "Inovasi Otomotif Terbaru Menghadirkan Kendaraan Ramah Lingkungan",
-      excerpt: "Industri otomotif meluncurkan teknologi baru yang lebih efisien...",
-      category: "Otomotif",
-      image: "/placeholder.svg?height=200&width=300",
-      publishedAt: "2024-01-14",
-      author: "Mike Johnson",
-      likes: 32,
-      comments: 8,
-    },
-    {
-      id: 3,
-      title: "Tips Kesehatan untuk Menjaga Imunitas di Musim Hujan",
-      excerpt: "Para ahli kesehatan memberikan rekomendasi untuk menjaga kesehatan...",
-      category: "Kesehatan",
-      image: "/placeholder.svg?height=200&width=300",
-      publishedAt: "2024-01-13",
-      author: "Dr. Sarah Wilson",
-      likes: 67,
-      comments: 23,
-    },
-    {
-      id: 4,
-      title: "Kebijakan Politik Terbaru Mendapat Respons Positif Masyarakat",
-      excerpt: "Pemerintah mengumumkan kebijakan baru yang diharapkan dapat...",
-      category: "Politik",
-      image: "/placeholder.svg?height=200&width=300",
-      publishedAt: "2024-01-12",
-      author: "Robert Brown",
-      likes: 89,
-      comments: 34,
-    },
-    {
-      id: 5,
-      title: "Revolusi Digital Mengubah Cara Kerja di Era Modern",
-      excerpt: "Transformasi digital membawa perubahan signifikan dalam dunia kerja...",
-      category: "Teknologi",
-      image: "/placeholder.svg?height=200&width=300",
-      publishedAt: "2024-01-11",
-      author: "Lisa Chen",
-      likes: 156,
-      comments: 45,
-    },
-    {
-      id: 6,
-      title: "Ekonomi Nasional Menunjukkan Tren Positif di Kuartal Ini",
-      excerpt: "Data ekonomi terbaru menunjukkan pertumbuhan yang menggembirakan...",
-      category: "Ekonomi",
-      image: "/placeholder.svg?height=200&width=300",
-      publishedAt: "2024-01-10",
-      author: "David Lee",
-      likes: 78,
-      comments: 19,
-    },
-  ]
+export function NewsGrid({ category }: NewsGridProps) {
+  const [news, setNews] = useState<News[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const limit = 9;
+
+  const fetchNews = async (pageToLoad: number) => {
+    try {
+      if (pageToLoad === 1) setLoading(true);
+      else setIsLoadingMore(true);
+
+      const params = new URLSearchParams({
+        page: pageToLoad.toString(),
+        limit: limit.toString(),
+      });
+
+      if (category) {
+        params.append("category", category);
+      }
+
+      const res = await fetch(`/api/news?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed to fetch news");
+      const json = await res.json();
+      const items = (json?.data ?? []) as any[];
+
+      // Map API shape -> component shape
+      const mapped: News[] = items.map((n) => ({
+        id: n.id,
+        title: n.title,
+        excerpt: n.excerpt,
+        category: n.category,
+        image: n.image ?? null,
+        publishedAt: n.published_at ?? null,
+        author: n.author,
+        likes: n.likes ?? 0,
+        comments: n.comments ?? 0,
+      }));
+
+      setNews((prev) => (pageToLoad === 1 ? mapped : [...prev, ...mapped]));
+
+      const totalPages = json?.pagination?.totalPages ?? 1;
+      setHasMore(pageToLoad < totalPages);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
-    // Simulate API call
-    const fetchNews = async () => {
-      setLoading(true)
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      setNews(mockNews)
-      setLoading(false)
-    }
-
-    fetchNews()
-  }, [])
+    fetchNews(1);
+  }, [category]);
 
   const loadMore = () => {
-    setPage((prev) => prev + 1)
-    // In real implementation, fetch more news based on page
-  }
+    const next = page + 1;
+    setPage(next);
+    fetchNews(next);
+  };
 
   if (loading) {
     return (
@@ -122,24 +94,37 @@ export function NewsGrid() {
           </div>
         ))}
       </div>
-    )
+    );
   }
 
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {news.map((article) => (
-          <NewsCard key={article.id} news={article} />
+          <NewsCard
+            key={article.id}
+            news={{
+              id: article.id,
+              title: article.title,
+              excerpt: article.excerpt,
+              category: article.category,
+              image: article.image ?? "/placeholder.svg",
+              publishedAt: article.publishedAt ?? "",
+              author: article.author,
+              likes: article.likes,
+              comments: article.comments,
+            }}
+          />
         ))}
       </div>
 
       {hasMore && (
         <div className="text-center mt-8">
-          <Button onClick={loadMore} variant="outline">
-            Muat Lebih Banyak
+          <Button onClick={loadMore} variant="outline" disabled={isLoadingMore}>
+            {isLoadingMore ? "Memuat..." : "Muat Lebih Banyak"}
           </Button>
         </div>
       )}
     </div>
-  )
+  );
 }

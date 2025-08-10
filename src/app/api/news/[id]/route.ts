@@ -1,60 +1,114 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
-import { requireAuth } from "@/lib/auth"
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { requireAuth } from "@/lib/auth";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const newsId = Number.parseInt(params.id)
+    const { id } = await params;
+    const newsId = parseInt(id);
+    const auth = requireAuth(request);
 
-    if (isNaN(newsId)) {
-      return NextResponse.json({ error: "ID berita tidak valid" }, { status: 400 })
-    }
-
-    // Get news with category and author info
-    const [rows] = await db.execute(
-      `
-      SELECT 
-        n.id, n.title, n.slug, n.excerpt, n.content, n.image, n.views, n.published_at, n.created_at,
-        c.name as category, c.slug as category_slug,
-        u.name as author, u.id as author_id,
-        (SELECT COUNT(*) FROM likes WHERE news_id = n.id) as likes,
-        (SELECT COUNT(*) FROM comments WHERE news_id = n.id AND status = 'approved') as comments
-      FROM news n
-      LEFT JOIN categories c ON n.category_id = c.id
-      LEFT JOIN users u ON n.author_id = u.id
-      WHERE n.id = ? AND n.status = 'published'
-    `,
-      [newsId],
-    )
-
-    const news = (rows as any[])[0]
+    // Get news with relations using Prisma
+    const news = await prisma.news.findUnique({
+      where: {
+        id: newsId,
+        status: "published",
+      },
+      include: {
+        category: {
+          select: {
+            name: true,
+            slug: true,
+          },
+        },
+        author: {
+          select: {
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+          },
+        },
+      },
+    });
 
     if (!news) {
-      return NextResponse.json({ error: "Berita tidak ditemukan" }, { status: 404 })
+      return NextResponse.json(
+        { error: "Berita tidak ditemukan" },
+        { status: 404 }
+      );
     }
 
-    // Update view count
-    await db.execute("UPDATE news SET views = views + 1 WHERE id = ?", [newsId])
+    // Approved comments count
+    const approvedCount = await prisma.comment.count({
+      where: { newsId, status: "approved" },
+    });
 
-    // Check if user has liked or saved this news
-    const auth = requireAuth(request)
+    // Increment view count
+    await prisma.news.update({
+      where: { id: newsId },
+      data: { views: { increment: 1 } },
+    });
+
+    // Check if user has liked this news
+    let userLiked = false;
+    let userSaved = false;
+
     if (auth) {
-      const [likeRows] = await db.execute("SELECT id FROM likes WHERE user_id = ? AND news_id = ?", [
-        auth.userId,
-        newsId,
-      ])
-      const [saveRows] = await db.execute("SELECT id FROM saved_news WHERE user_id = ? AND news_id = ?", [
-        auth.userId,
-        newsId,
-      ])
+      const [like, saved] = await Promise.all([
+        prisma.like.findUnique({
+          where: {
+            newsId_userId: {
+              newsId: newsId,
+              userId: auth.userId,
+            },
+          },
+        }),
+        prisma.savedNews.findUnique({
+          where: {
+            newsId_userId: {
+              newsId: newsId,
+              userId: auth.userId,
+            },
+          },
+        }),
+      ]);
 
-      news.isLiked = (likeRows as any[]).length > 0
-      news.isSaved = (saveRows as any[]).length > 0
+      userLiked = !!like;
+      userSaved = !!saved;
     }
 
-    return NextResponse.json(news)
+    // Transform data to match expected format
+    const transformedNews = {
+      id: news.id,
+      title: news.title,
+      slug: news.slug,
+      excerpt: news.excerpt,
+      content: news.content,
+      image: news.image,
+      views: news.views + 1, // Include the increment
+      publishedAt: news.publishedAt,
+      category: news.category.name,
+      category_slug: news.category.slug,
+      author: news.author.name,
+      likes: news._count.likes,
+      comments: approvedCount,
+      userLiked,
+      userSaved,
+    };
+
+    return NextResponse.json(transformedNews);
   } catch (error) {
-    console.error("Fetch news detail error:", error)
-    return NextResponse.json({ error: "Gagal mengambil detail berita" }, { status: 500 })
+    console.error("Fetch news detail error:\n", error);
+    return NextResponse.json(
+      { error: "Gagal mengambil detail berita" },
+      { status: 500 }
+    );
   }
 }

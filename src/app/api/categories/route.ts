@@ -1,24 +1,27 @@
 // app/api/admin/categories/route.ts
-import { type NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
-import { requireAuth } from "@/lib/auth"
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = requireAuth(request)
-    
-    if (!auth || auth.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    // Get all categories using Prisma
+    const categories = await prisma.category.findMany({
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
 
-    const [categories] = await db.execute("SELECT id, name FROM categories")
-    
-    return NextResponse.json(categories)
+    return NextResponse.json(categories);
   } catch (error) {
-    console.error("Get categories error:", error)
+    console.error("Fetch categories error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch categories" },
+      { error: "Gagal mengambil kategori" },
       { status: 500 }
-    )
+    );
   }
 }

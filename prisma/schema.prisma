@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root:@localhost:3306/portal_berita"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  role      String   @default("user") @db.VarChar(20) // 'user' | 'admin'
+  status    String   @default("active") @db.VarChar(20) // 'active' | 'inactive'
+  avatar    String?  @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  news      News[]
+  comments  Comment[]
+  likes     Like[]
+  savedNews SavedNews[]
+
+  @@map("users")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  news News[]
+
+  @@map("categories")
+}
+
+model News {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  slug        String   @unique @db.VarChar(255)
+  excerpt     String   @db.Text
+  content     String   @db.LongText
+  image       String?  @db.VarChar(255)
+  views       Int      @default(0)
+  status      String   @default("draft") @db.VarChar(20) // 'draft' | 'published' | 'archived'
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Foreign Keys
+  categoryId Int @map("category_id")
+  authorId   Int @map("author_id")
+
+  // Relations
+  category   Category    @relation(fields: [categoryId], references: [id])
+  author     User        @relation(fields: [authorId], references: [id])
+  comments   Comment[]
+  likes      Like[]
+  savedNews  SavedNews[]
+
+  @@map("news")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  status    String   @default("pending") @db.VarChar(20) // 'pending' | 'approved' | 'rejected'
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Foreign Keys
+  newsId Int @map("news_id")
+  userId Int @map("user_id")
+
+  // Relations
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Foreign Keys
+  newsId Int @map("news_id")
+  userId Int @map("user_id")
+
+  // Relations
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([newsId, userId])
+  @@map("likes")
+}
+
+model SavedNews {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Foreign Keys
+  newsId Int @map("news_id")
+  userId Int @map("user_id")
+
+  // Relations
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([newsId, userId])
+  @@map("saved_news")
+}

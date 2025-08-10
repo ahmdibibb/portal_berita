@@ -1,82 +1,116 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const category = searchParams.get("category")
-    const page = Number.parseInt(searchParams.get("page") || "1")
-    const limit = Number.parseInt(searchParams.get("limit") || "10")
-    const search = searchParams.get("search")
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get("category");
+    const page = Number.parseInt(searchParams.get("page") || "1");
+    const limit = Number.parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search");
 
-    let query = `
-      SELECT 
-        n.id, n.title, n.slug, n.excerpt, n.image, n.views, n.published_at,
-        c.name as category, c.slug as category_slug,
-        u.name as author,
-        (SELECT COUNT(*) FROM likes WHERE news_id = n.id) as likes,
-        (SELECT COUNT(*) FROM comments WHERE news_id = n.id AND status = 'approved') as comments
-      FROM news n
-      LEFT JOIN categories c ON n.category_id = c.id
-      LEFT JOIN users u ON n.author_id = u.id
-      WHERE n.status = 'published'
-    `
-
-    const params: any[] = []
+    // Build where clause
+    const where: any = {
+      status: "published",
+    };
 
     if (category && category !== "all") {
-      query += " AND c.slug = ?"
-      params.push(category)
+      // Relasi to-one: gunakan 'is' untuk filter yang lebih kompatibel
+      where.category = {
+        is: {
+          slug: category,
+        },
+      };
     }
 
     if (search) {
-      query += " AND (n.title LIKE ? OR n.excerpt LIKE ?)"
-      params.push(`%${search}%`, `%${search}%`)
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { excerpt: { contains: search, mode: "insensitive" } },
+      ];
     }
 
-    query += " ORDER BY n.published_at DESC"
+    // Get news with relations using Prisma
+    const news = await prisma.news.findMany({
+      where,
+      include: {
+        category: {
+          select: {
+            name: true,
+            slug: true,
+          },
+        },
+        author: {
+          select: {
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+            comments: true, // total comments (tanpa filter). Nanti kita timpa dengan approvedCount
+          },
+        },
+      },
+      orderBy: {
+        publishedAt: "desc",
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
 
-    // Add pagination
-    const offset = (page - 1) * limit
-    query += " LIMIT ? OFFSET ?"
-    params.push(limit, offset)
+    // Ambil jumlah komentar APPROVED per berita via groupBy (satu query untuk semua id)
+    const newsIds = news.map((n) => n.id);
+    const approvedGroups = newsIds.length
+      ? await prisma.comment.groupBy({
+          by: ["newsId"],
+          where: { newsId: { in: newsIds }, status: "approved" },
+          _count: { _all: true },
+        })
+      : [];
 
-    const [rows] = await db.execute(query, params)
+    const approvedCountMap = new Map<number, number>();
+    for (const g of approvedGroups) {
+      approvedCountMap.set(g.newsId as number, g._count._all);
+    }
 
     // Get total count for pagination
-    let countQuery = `
-      SELECT COUNT(*) as total
-      FROM news n
-      LEFT JOIN categories c ON n.category_id = c.id
-      WHERE n.status = 'published'
-    `
+    const total = await prisma.news.count({ where });
 
-    const countParams: any[] = []
-
-    if (category && category !== "all") {
-      countQuery += " AND c.slug = ?"
-      countParams.push(category)
-    }
-
-    if (search) {
-      countQuery += " AND (n.title LIKE ? OR n.excerpt LIKE ?)"
-      countParams.push(`%${search}%`, `%${search}%`)
-    }
-
-    const [countRows] = await db.execute(countQuery, countParams)
-    const total = (countRows as any[])[0].total
+    // Transform data to match expected format
+    const transformedNews = news.map((item) => ({
+      id: item.id,
+      title: item.title,
+      slug: item.slug,
+      excerpt: item.excerpt,
+      image: item.image,
+      views: item.views,
+      published_at: item.publishedAt,
+      category: item.category.name,
+      category_slug: item.category.slug,
+      author: item.author.name,
+      likes: item._count.likes,
+      comments: approvedCountMap.get(item.id) ?? 0,
+    }));
 
     return NextResponse.json({
-      data: rows,
+      data: transformedNews,
       pagination: {
         page,
         limit,
         total,
         totalPages: Math.ceil(total / limit),
       },
-    })
-  } catch (error) {
-    console.error("Fetch news error:", error)
-    return NextResponse.json({ error: "Gagal mengambil berita" }, { status: 500 })
+    });
+  } catch (error: any) {
+    console.error("Fetch news error:\n", error);
+    const detail =
+      process.env.NODE_ENV !== "production" && error
+        ? String(error?.message || error)
+        : undefined;
+    return NextResponse.json(
+      { error: "Gagal mengambil berita", detail },
+      { status: 500 }
+    );
   }
 }

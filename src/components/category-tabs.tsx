@@ -1,32 +1,68 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useState } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRouter, usePathname } from "next/navigation";
 
-const categories = [
-  { id: "all", name: "Semua" },
-  { id: "olahraga", name: "Olahraga" },
-  { id: "otomotif", name: "Otomotif" },
-  { id: "kesehatan", name: "Kesehatan" },
-  { id: "politik", name: "Politik" },
-  { id: "teknologi", name: "Teknologi" },
-  { id: "ekonomi", name: "Ekonomi" },
-]
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
 
 export function CategoryTabs() {
-  const [activeCategory, setActiveCategory] = useState("all")
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/categories");
+        if (!res.ok) return;
+        const data: Category[] = await res.json();
+        setCategories(data);
+      } catch (e) {
+        // ignore
+      }
+    };
+    load();
+  }, []);
+
+  // Set active category based on current pathname
+  useEffect(() => {
+    if (pathname.startsWith("/category/")) {
+      const slug = pathname.split("/category/")[1];
+      setActiveCategory(slug);
+    } else {
+      setActiveCategory("all");
+    }
+  }, [pathname]);
+
+  const handleCategoryChange = (value: string) => {
+    setActiveCategory(value);
+    if (value === "all") {
+      router.push("/");
+    } else {
+      router.push(`/category/${value}`);
+    }
+  };
 
   return (
     <div className="mb-8">
-      <Tabs value={activeCategory} onValueChange={setActiveCategory}>
+      <Tabs value={activeCategory} onValueChange={handleCategoryChange}>
         <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
+          <TabsTrigger key="all" value="all">
+            Semua
+          </TabsTrigger>
           {categories.map((category) => (
-            <TabsTrigger key={category.id} value={category.id}>
+            <TabsTrigger key={category.slug} value={category.slug}>
               {category.name}
             </TabsTrigger>
           ))}
         </TabsList>
       </Tabs>
     </div>
-  )
+  );
 }

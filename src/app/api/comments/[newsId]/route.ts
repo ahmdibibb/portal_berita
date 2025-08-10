@@ -1,83 +1,127 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
-import { requireAuth } from "@/lib/auth"
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { requireAuth } from "@/lib/auth";
 
-export async function GET(request: NextRequest, { params }: { params: { newsId: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ newsId: string }> }
+) {
   try {
-    const newsId = Number.parseInt(params.newsId)
+    const { newsId: newsIdParam } = await params;
+    const newsId = parseInt(newsIdParam);
 
-    if (isNaN(newsId)) {
-      return NextResponse.json({ error: "ID berita tidak valid" }, { status: 400 })
-    }
+    // Get comments using Prisma
+    const comments = await prisma.comment.findMany({
+      where: {
+        newsId,
+        status: "approved",
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            avatar: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
-    const [rows] = await db.execute(
-      `
-      SELECT 
-        c.id, c.content, c.created_at, c.parent_id,
-        u.name as user_name, u.id as user_id
-      FROM comments c
-      LEFT JOIN users u ON c.user_id = u.id
-      WHERE c.news_id = ? AND c.status = 'approved'
-      ORDER BY c.created_at DESC
-    `,
-      [newsId],
-    )
+    // Transform data to match expected format
+    const transformedComments = comments.map((comment) => ({
+      id: comment.id,
+      content: comment.content,
+      createdAt: comment.createdAt,
+      user: {
+        name: comment.user.name,
+        avatar: comment.user.avatar,
+      },
+    }));
 
-    return NextResponse.json(rows)
+    return NextResponse.json(transformedComments);
   } catch (error) {
-    console.error("Fetch comments error:", error)
-    return NextResponse.json({ error: "Gagal mengambil komentar" }, { status: 500 })
+    console.error("Fetch comments error:", error);
+    return NextResponse.json(
+      { error: "Gagal mengambil komentar" },
+      { status: 500 }
+    );
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { newsId: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ newsId: string }> }
+) {
   try {
-    const auth = requireAuth(request)
+    const auth = requireAuth(request);
 
     if (!auth) {
-      return NextResponse.json({ error: "Harus login untuk berkomentar" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const newsId = Number.parseInt(params.newsId)
-    const { content, parentId } = await request.json()
-
-    if (isNaN(newsId)) {
-      return NextResponse.json({ error: "ID berita tidak valid" }, { status: 400 })
-    }
+    const { newsId: newsIdParam } = await params;
+    const newsId = parseInt(newsIdParam);
+    const { content } = await request.json();
 
     if (!content || content.trim().length === 0) {
-      return NextResponse.json({ error: "Komentar tidak boleh kosong" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Komentar tidak boleh kosong" },
+        { status: 400 }
+      );
     }
 
-    // Check if news exists
-    const [newsRows] = await db.execute("SELECT id FROM news WHERE id = ? AND status = 'published'", [newsId])
+    // Check if news exists and is published
+    const news = await prisma.news.findUnique({
+      where: {
+        id: newsId,
+        status: "published",
+      },
+    });
 
-    if ((newsRows as any[]).length === 0) {
-      return NextResponse.json({ error: "Berita tidak ditemukan" }, { status: 404 })
+    if (!news) {
+      return NextResponse.json(
+        { error: "Berita tidak ditemukan" },
+        { status: 404 }
+      );
     }
 
-    // Insert comment
-    const [result] = await db.execute(
-      "INSERT INTO comments (news_id, user_id, content, parent_id) VALUES (?, ?, ?, ?)",
-      [newsId, auth.userId, content.trim(), parentId || null],
-    )
+    // Create comment using Prisma
+    const comment = await prisma.comment.create({
+      data: {
+        content: content.trim(),
+        newsId,
+        userId: auth.userId,
+        status: "pending", // Default to pending for moderation
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            avatar: true,
+          },
+        },
+      },
+    });
 
-    // Get the created comment with user info
-    const [commentRows] = await db.execute(
-      `
-      SELECT 
-        c.id, c.content, c.created_at, c.parent_id,
-        u.name as user_name, u.id as user_id
-      FROM comments c
-      LEFT JOIN users u ON c.user_id = u.id
-      WHERE c.id = ?
-    `,
-      [(result as any).insertId],
-    )
+    // Transform data to match expected format
+    const transformedComment = {
+      id: comment.id,
+      content: comment.content,
+      createdAt: comment.createdAt,
+      user: {
+        name: comment.user.name,
+        avatar: comment.user.avatar,
+      },
+    };
 
-    return NextResponse.json((commentRows as any[])[0], { status: 201 })
+    return NextResponse.json(transformedComment, { status: 201 });
   } catch (error) {
-    console.error("Create comment error:", error)
-    return NextResponse.json({ error: "Gagal menambahkan komentar" }, { status: 500 })
+    console.error("Create comment error:", error);
+    return NextResponse.json(
+      { error: "Gagal membuat komentar" },
+      { status: 500 }
+    );
   }
 }

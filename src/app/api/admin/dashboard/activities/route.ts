@@ -1,62 +1,103 @@
 // app/api/admin/dashboard/activities/route.ts
-import { type NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
-import { requireAuth } from "@/lib/auth"
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { requireAuth } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = requireAuth(request)
-    
+    const auth = requireAuth(request);
+
     if (!auth || auth.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get recent news activities
-    const [newsActivities] = await db.execute(
-      `SELECT 
-        'news' as type,
-        CONCAT('Berita baru dipublikasi: ', title) as message,
-        published_at as timestamp
-      FROM news
-      WHERE status = 'published'
-      ORDER BY published_at DESC
-      LIMIT 3`
-    )
+    // Get recent activities using Prisma
+    const [recentNews, recentUsers, recentComments] = await Promise.all([
+      // Recent news
+      prisma.news.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        include: {
+          author: {
+            select: { name: true },
+          },
+          category: {
+            select: { name: true },
+          },
+        },
+      }),
 
-    // Get recent user activities
-    const [userActivities] = await db.execute(
-      `SELECT 
-        'user' as type,
-        CONCAT('Pengguna baru mendaftar: ', name) as message,
-        created_at as timestamp
-      FROM users
-      ORDER BY created_at DESC
-      LIMIT 3`
-    )
+      // Recent users
+      prisma.user.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+        },
+      }),
 
-    // Get recent comment activities
-    const [commentActivities] = await db.execute(
-      `SELECT 
-        'comment' as type,
-        CONCAT('Komentar baru ditambahkan oleh ', u.name) as message,
-        c.created_at as timestamp
-      FROM comments c
-      JOIN users u ON c.user_id = u.id
-      ORDER BY c.created_at DESC
-      LIMIT 3`
-    )
+      // Recent comments
+      prisma.comment.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        include: {
+          user: {
+            select: { name: true },
+          },
+          news: {
+            select: { title: true },
+          },
+        },
+      }),
+    ]);
 
-    // Combine and sort all activities
-    const allActivities = [
-      ...(newsActivities as any[]),
-      ...(userActivities as any[]),
-      ...(commentActivities as any[]),
-    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    .slice(0, 5) // Get top 5 most recent
+    // Transform activities
+    const activities = [];
 
-    return NextResponse.json(allActivities)
+    // Add news activities
+    recentNews.forEach((news) => {
+      activities.push({
+        type: "news",
+        message: `Berita "${news.title}" ditambahkan oleh ${news.author.name}`,
+        timestamp: news.createdAt,
+      });
+    });
+
+    // Add user activities
+    recentUsers.forEach((user) => {
+      activities.push({
+        type: "user",
+        message: `Pengguna baru "${user.name}" (${user.email}) mendaftar`,
+        timestamp: user.createdAt,
+      });
+    });
+
+    // Add comment activities
+    recentComments.forEach((comment) => {
+      activities.push({
+        type: "comment",
+        message: `Komentar baru dari ${comment.user.name} pada berita "${comment.news.title}"`,
+        timestamp: comment.createdAt,
+      });
+    });
+
+    // Sort by timestamp and take latest 10
+    activities.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    const recentActivities = activities.slice(0, 10);
+
+    return NextResponse.json(recentActivities);
   } catch (error) {
-    console.error("Get dashboard activities error:", error)
-    return NextResponse.json({ error: "Gagal mengambil aktivitas dashboard" }, { status: 500 })
+    console.error("Get activities error:", error);
+    return NextResponse.json(
+      { error: "Gagal mengambil aktivitas" },
+      { status: 500 }
+    );
   }
 }

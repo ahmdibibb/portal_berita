@@ -1,56 +1,65 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useAuth } from "@/hooks/use-auth"
-import { toast } from "sonner"
-import { MessageCircle, Send } from "lucide-react"
-import type { Comment } from "@/lib/mock-data"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
+import { MessageCircle, Send } from "lucide-react";
+
+interface ApiComment {
+  id: number;
+  content: string;
+  createdAt: string;
+  user: {
+    name: string;
+    avatar?: string | null;
+  };
+}
 
 interface CommentSectionProps {
-  newsId: string
+  newsId: string;
 }
 
 export function CommentSection({ newsId }: CommentSectionProps) {
-  const [comments, setComments] = useState<Comment[]>([])
-  const [newComment, setNewComment] = useState("")
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const { user } = useAuth()
+  const [comments, setComments] = useState<ApiComment[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchComments()
-  }, [newsId])
+    fetchComments();
+  }, [newsId]);
 
   const fetchComments = async () => {
     try {
-      const response = await fetch(`/api/comments/${newsId}`)
+      const response = await fetch(`/api/comments/${newsId}`);
       if (response.ok) {
-        const commentsData = await response.json()
-        setComments(commentsData)
+        const commentsData: ApiComment[] = await response.json();
+        setComments(commentsData);
       }
     } catch (error) {
-      console.error("Failed to fetch comments:", error)
+      console.error("Failed to fetch comments:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!user) {
-      toast.error("Login diperlukan")
-      return
+      toast.error("Login diperlukan");
+      return;
     }
 
-    if (!newComment.trim()) return
+    if (!newComment.trim()) return;
 
-    setSubmitting(true)
+    setSubmitting(true);
 
     try {
       const response = await fetch(`/api/comments/${newsId}`, {
@@ -59,20 +68,20 @@ export function CommentSection({ newsId }: CommentSectionProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ content: newComment }),
-      })
+      });
 
       if (response.ok) {
-        const comment = await response.json()
-        setComments((prev) => [...prev, comment])
-        setNewComment("")
-        toast.success("Komentar berhasil ditambahkan")
+        const comment: ApiComment | undefined = await response.json();
+        if (comment) setComments((prev) => [...prev, comment]);
+        setNewComment("");
+        toast.success("Komentar berhasil ditambahkan");
       }
     } catch (error) {
-      toast.error("Gagal menambahkan komentar")
+      toast.error("Gagal menambahkan komentar");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <Card className="mt-8">
@@ -98,7 +107,9 @@ export function CommentSection({ newsId }: CommentSectionProps) {
             </Button>
           </form>
         ) : (
-          <div className="text-center py-4 text-muted-foreground">Silakan login untuk memberikan komentar</div>
+          <div className="text-center py-4 text-muted-foreground">
+            Silakan login untuk memberikan komentar
+          </div>
         )}
 
         {/* Comments List */}
@@ -107,9 +118,12 @@ export function CommentSection({ newsId }: CommentSectionProps) {
             <div>Loading comments...</div>
           ) : comments.length > 0 ? (
             comments.map((comment) => (
-              <div key={comment.id} className="border-l-2 border-muted pl-4 space-y-2">
+              <div
+                key={comment.id}
+                className="border-l-2 border-muted pl-4 space-y-2"
+              >
                 <div className="flex items-center space-x-2 text-sm">
-                  <span className="font-medium">{comment.userName}</span>
+                  <span className="font-medium">{comment.user.name}</span>
                   <span className="text-muted-foreground">
                     {new Date(comment.createdAt).toLocaleDateString("id-ID")}
                   </span>
@@ -125,5 +139,5 @@ export function CommentSection({ newsId }: CommentSectionProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
