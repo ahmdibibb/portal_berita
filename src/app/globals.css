@@ -120,3 +120,255 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom Prose Styling for News Content */
+.prose {
+  @apply text-foreground;
+}
+
+.prose h1 {
+  @apply text-3xl font-bold text-foreground mb-6 mt-8;
+}
+
+.prose h2 {
+  @apply text-2xl font-semibold text-foreground mb-4 mt-6;
+}
+
+.prose h3 {
+  @apply text-xl font-semibold text-foreground mb-3 mt-5;
+}
+
+.prose h4 {
+  @apply text-lg font-medium text-foreground mb-2 mt-4;
+}
+
+.prose p {
+  @apply text-base leading-7 text-foreground mb-4;
+}
+
+.prose strong {
+  @apply font-semibold text-foreground;
+}
+
+.prose em {
+  @apply italic text-foreground;
+}
+
+.prose ul {
+  @apply list-disc list-inside mb-4 space-y-2;
+}
+
+.prose ol {
+  @apply list-decimal list-inside mb-4 space-y-2;
+}
+
+.prose li {
+  @apply text-foreground;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-primary pl-4 py-2 my-6 bg-muted/30 italic text-muted-foreground;
+}
+
+.prose code {
+  @apply bg-muted px-2 py-1 rounded text-sm font-mono text-foreground;
+}
+
+.prose pre {
+  @apply bg-muted p-4 rounded-lg overflow-x-auto my-4;
+}
+
+.prose a {
+  @apply text-primary hover:text-primary/80 underline underline-offset-2;
+}
+
+.prose img {
+  @apply rounded-lg my-6 max-w-full h-auto;
+}
+
+.prose table {
+  @apply w-full border-collapse my-6;
+}
+
+.prose th {
+  @apply border border-border px-4 py-2 text-left font-semibold bg-muted;
+}
+
+.prose td {
+  @apply border border-border px-4 py-2;
+}
+
+.prose hr {
+  @apply border-border my-8;
+}
+
+/* News specific styling */
+.news-content {
+  @apply text-lg leading-relaxed;
+}
+
+.news-content p:first-of-type {
+  @apply text-xl leading-relaxed font-medium text-muted-foreground;
+}
+
+.news-content p:first-of-type::first-letter {
+  @apply text-4xl font-bold text-primary float-left mr-2 mt-1;
+}
+
+/* Additional improvements for news readability */
+.news-content p {
+  @apply text-justify hyphens-auto mb-6 text-foreground leading-7;
+}
+
+.news-content p:not(:first-of-type) {
+  @apply text-base leading-7 text-foreground;
+}
+
+.news-content h2,
+.news-content h3,
+.news-content h4 {
+  @apply text-primary font-bold mb-4 mt-8;
+}
+
+.news-content ul,
+.news-content ol {
+  @apply pl-6 mb-6;
+}
+
+.news-content li {
+  @apply mb-3 leading-6;
+}
+
+.news-content blockquote {
+  @apply bg-gradient-to-r from-primary/5 to-primary/10 border-l-4 border-primary pl-6 py-4 my-8 italic text-muted-foreground rounded-r-lg;
+}
+
+.news-content img {
+  @apply mx-auto my-8 rounded-lg shadow-md;
+}
+
+/* Paragraph spacing and structure */
+.news-content p + p {
+  @apply mt-6;
+}
+
+.news-content p + h2,
+.news-content p + h3,
+.news-content p + h4 {
+  @apply mt-10;
+}
+
+.news-content h2 + p,
+.news-content h3 + p,
+.news-content h4 + p {
+  @apply mt-4;
+}
+
+/* Text alignment and readability */
+.news-content p {
+  @apply text-left leading-8;
+}
+
+/* Special paragraph styling */
+.news-content p.lead {
+  @apply text-xl leading-8 font-medium text-muted-foreground mb-8;
+}
+
+.news-content p.summary {
+  @apply bg-muted/30 p-4 rounded-lg border-l-4 border-primary mb-8;
+}
+
+/* Enhanced paragraph structure */
+.news-content p {
+  @apply text-left leading-8 mb-6 text-foreground;
+  text-indent: 0;
+  max-width: 100%;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+/* First paragraph special styling */
+.news-content p:first-of-type {
+  @apply text-xl leading-8 font-medium text-muted-foreground mb-8;
+  text-indent: 0;
+}
+
+/* Regular paragraphs */
+.news-content p:not(:first-of-type) {
+  @apply text-base leading-7 text-foreground mb-6;
+  text-indent: 0;
+}
+
+/* Paragraph spacing rules */
+.news-content p + p {
+  @apply mt-6;
+}
+
+.news-content p + h2,
+.news-content p + h3,
+.news-content p + h4 {
+  @apply mt-10;
+}
+
+.news-content h2 + p,
+.news-content h3 + p,
+.news-content h4 + p {
+  @apply mt-4;
+}
+
+/* List and paragraph spacing */
+.news-content ul + p,
+.news-content ol + p {
+  @apply mt-6;
+}
+
+.news-content p + ul,
+.news-content p + ol {
+  @apply mt-4;
+}
+
+/* Blockquote and paragraph spacing */
+.news-content p + blockquote {
+  @apply mt-6;
+}
+
+.news-content blockquote + p {
+  @apply mt-6;
+}
+
+/* Image and paragraph spacing */
+.news-content p + img {
+  @apply mt-6;
+}
+
+.news-content img + p {
+  @apply mt-6;
+}
+
+/* Final paragraph spacing */
+.news-content p:last-of-type {
+  @apply mb-0;
+}
+
+/* Responsive text sizing */
+@media (max-width: 768px) {
+  .news-content {
+    @apply text-base leading-7;
+  }
+
+  .news-content p:first-of-type {
+    @apply text-lg;
+  }
+
+  .news-content p:first-of-type::first-letter {
+    @apply text-3xl;
+  }
+
+  .news-content p {
+    @apply mb-4 leading-6;
+  }
+
+  .news-content p + p {
+    @apply mt-4;
+  }
+}

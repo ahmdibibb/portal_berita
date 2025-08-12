@@ -9,12 +9,19 @@ interface News {
   id: number;
   title: string;
   excerpt: string;
-  category: string;
+  category: {
+    name: string;
+    slug: string;
+  };
   image: string | null;
-  publishedAt: string | null;
-  author: string;
-  likes: number;
-  comments: number;
+  publishedAt: string;
+  author: {
+    name: string;
+  };
+  _count?: {
+    likes: number;
+    comments: number;
+  };
 }
 
 interface NewsGridProps {
@@ -46,24 +53,13 @@ export function NewsGrid({ category }: NewsGridProps) {
       const res = await fetch(`/api/news?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch news");
       const json = await res.json();
-      const items = (json?.data ?? []) as any[];
+      const items = (json?.data ?? []) as News[];
 
-      // Map API shape -> component shape
-      const mapped: News[] = items.map((n) => ({
-        id: n.id,
-        title: n.title,
-        excerpt: n.excerpt,
-        category: n.category,
-        image: n.image ?? null,
-        publishedAt: n.published_at ?? null,
-        author: n.author,
-        likes: n.likes ?? 0,
-        comments: n.comments ?? 0,
-      }));
+      // Data sudah dalam format yang benar dari API, tidak perlu mapping
+      setNews((prev) => (pageToLoad === 1 ? items : [...prev, ...items]));
 
-      setNews((prev) => (pageToLoad === 1 ? mapped : [...prev, ...mapped]));
-
-      const totalPages = json?.pagination?.totalPages ?? 1;
+      const total = json?.total ?? 0;
+      const totalPages = Math.ceil(total / limit);
       setHasMore(pageToLoad < totalPages);
     } catch (e) {
       console.error(e);
@@ -107,12 +103,12 @@ export function NewsGrid({ category }: NewsGridProps) {
               id: article.id,
               title: article.title,
               excerpt: article.excerpt,
-              category: article.category,
+              category: article.category.name, // Extract name from category object
               image: article.image ?? "/placeholder.svg",
-              publishedAt: article.publishedAt ?? "",
-              author: article.author,
-              likes: article.likes,
-              comments: article.comments,
+              publishedAt: article.publishedAt,
+              author: article.author.name, // Extract name from author object
+              likes: article._count?.likes ?? 0,
+              comments: article._count?.comments ?? 0,
             }}
           />
         ))}

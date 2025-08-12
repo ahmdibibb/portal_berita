@@ -1,27 +1,27 @@
 import { NewsDetail } from "@/components/news-detail";
 import { CommentSection } from "@/components/comment-section";
-import { RelatedNews } from "@/components/related-news";
 import { NewsInteractions } from "@/components/news-interactions";
 
 interface NewsPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function NewsPage({ params }: NewsPageProps) {
   const { id } = await params;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto space-y-8">
           <NewsDetail newsId={id} />
-          <NewsInteractions newsId={id} />
-          <CommentSection newsId={id} />
-        </div>
-        <div className="lg:col-span-1">
-          <RelatedNews newsId={id} />
+          <div className="border-t border-border pt-8">
+            <NewsInteractions newsId={id} />
+          </div>
+          <div className="border-t border-border pt-8">
+            <CommentSection newsId={id} />
+          </div>
         </div>
       </div>
     </div>

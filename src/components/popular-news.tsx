@@ -8,12 +8,19 @@ interface NewsItem {
   id: number;
   title: string;
   excerpt: string;
-  category: string;
+  category: {
+    name: string;
+    slug: string;
+  };
   image: string | null;
-  published_at: string | null;
-  author: string;
-  likes: number;
-  comments: number;
+  publishedAt: string;
+  author: {
+    name: string;
+  };
+  _count?: {
+    likes: number;
+    comments: number;
+  };
 }
 
 export function PopularNews() {
@@ -29,7 +36,7 @@ export function PopularNews() {
           const payload = await response.json();
           const allNews: NewsItem[] = payload?.data ?? [];
           const sorted = [...allNews].sort(
-            (a, b) => (b.likes ?? 0) - (a.likes ?? 0)
+            (a, b) => (b._count?.likes ?? 0) - (a._count?.likes ?? 0)
           );
           setPopularNews(sorted.slice(0, 3));
         }
@@ -71,12 +78,12 @@ export function PopularNews() {
               id: news.id,
               title: news.title,
               excerpt: news.excerpt,
-              category: news.category,
+              category: news.category.name, // Extract name from category object
               image: news.image ?? "/placeholder.svg",
-              publishedAt: news.published_at ?? "",
-              author: news.author,
-              likes: news.likes ?? 0,
-              comments: news.comments ?? 0,
+              publishedAt: news.publishedAt,
+              author: news.author.name, // Extract name from author object
+              likes: news._count?.likes ?? 0,
+              comments: news._count?.comments ?? 0,
             }}
           />
         ))}

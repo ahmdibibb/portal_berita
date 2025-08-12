@@ -1,8 +1,8 @@
 // app/api/admin/categories/route.ts
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Get all categories using Prisma
     const categories = await prisma.category.findMany({

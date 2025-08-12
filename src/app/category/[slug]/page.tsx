@@ -1,9 +1,9 @@
 import { NewsGrid } from "@/components/news-grid";
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {

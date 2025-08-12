@@ -9,31 +9,40 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File;
 
     if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Tidak ada file yang diupload" },
+        { status: 400 }
+      );
     }
 
     // Validasi tipe file
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ];
+
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
         {
-          error:
-            "File type not allowed. Only JPEG, PNG, and WebP are supported.",
+          error: "Tipe file tidak didukung. Gunakan JPEG, PNG, WebP, atau GIF.",
         },
         { status: 400 }
       );
     }
 
-    // Validasi ukuran file (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Validasi ukuran file (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: "File size too large. Maximum size is 5MB." },
+        { error: "Ukuran file terlalu besar. Maksimal 10MB." },
         { status: 400 }
       );
     }
 
-    // Generate nama file unik
+    // Buat nama file yang unik
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 15);
     const fileExtension = file.name.split(".").pop();
@@ -51,20 +60,28 @@ export async function POST(request: NextRequest) {
     const filePath = join(uploadsDir, fileName);
     await writeFile(filePath, buffer);
 
-    // Return URL relatif untuk disimpan di database
+    // Return URL gambar
     const imageUrl = `/uploads/${fileName}`;
 
     return NextResponse.json({
       success: true,
       imageUrl,
       fileName,
-      message: "File uploaded successfully",
+      fileSize: file.size,
+      fileType: file.type,
     });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(
-      { error: "Failed to upload file" },
+      { error: "Gagal mengupload file" },
       { status: 500 }
     );
   }
 }
+
+// Konfigurasi untuk file upload yang lebih besar
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};

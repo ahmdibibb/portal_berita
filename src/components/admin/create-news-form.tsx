@@ -77,6 +77,27 @@ export function CreateNewsForm() {
       return;
     }
 
+    // Validasi panjang konten
+    if (formData.excerpt.length < 20) {
+      toast.error("Ringkasan harus minimal 20 karakter");
+      return;
+    }
+
+    if (formData.content.length < 100) {
+      toast.error("Konten berita harus minimal 100 karakter");
+      return;
+    }
+
+    // Validasi gambar (opsional tapi jika diisi harus valid)
+    if (
+      formData.image &&
+      !formData.image.startsWith("/uploads/") &&
+      !formData.image.startsWith("http")
+    ) {
+      toast.error("Format gambar tidak valid. Silakan upload ulang.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -99,7 +120,7 @@ export function CreateNewsForm() {
       }
 
       toast.success("Berita berhasil dipublikasikan");
-      router.push("/");
+      router.push("/admin/news");
     } catch (error: any) {
       toast.error("Gagal mempublikasikan: " + error.message);
       console.error("Submit error:", error);

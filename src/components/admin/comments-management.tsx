@@ -24,7 +24,7 @@ interface Comment {
 export function CommentsManagement() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  // // const router = useRouter();
 
   const fetchComments = async () => {
     try {

@@ -10,10 +10,15 @@ interface Item {
   id: number;
   title: string;
   excerpt: string;
-  category: string;
+  category: {
+    name: string;
+    slug: string;
+  };
   image: string | null;
-  published_at: string | null;
-  author: string;
+  publishedAt: string;
+  author: {
+    name: string;
+  };
   views?: number;
 }
 
@@ -56,7 +61,7 @@ export function HeroSection() {
           </div>
           <div className="p-6 lg:p-8 flex flex-col justify-center">
             <div className="flex items-center space-x-2 mb-3">
-              <Badge variant="secondary">{item.category}</Badge>
+              <Badge variant="secondary">{item.category.name}</Badge>
               <span className="text-xs text-gray-500">•</span>
               <span className="text-xs text-gray-500">Terbaru</span>
             </div>
@@ -73,7 +78,13 @@ export function HeroSection() {
               <div className="flex items-center space-x-4 text-sm text-gray-500">
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-1" />
-                  {item.published_at ?? "-"}
+                  {item.publishedAt
+                    ? new Date(item.publishedAt).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "-"}
                 </div>
                 <div className="flex items-center">
                   <Eye className="h-4 w-4 mr-1" />
@@ -92,7 +103,7 @@ export function HeroSection() {
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                   <span className="text-xs font-medium text-gray-600">
-                    {item.author
+                    {item.author.name
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
@@ -100,7 +111,7 @@ export function HeroSection() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-900">
-                    {item.author}
+                    {item.author.name}
                   </p>
                   <p className="text-xs text-gray-500">Jurnalis</p>
                 </div>

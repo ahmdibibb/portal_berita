@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, User, LogOut, X, Clock } from "lucide-react";
+import { SearchBar } from "@/components/search-bar";
+import { User, LogOut, X, Clock, Search } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
 
 const TimeZoneDisplay = ({ timezone }: { timezone: string }) => {
   const [time, setTime] = useState("");
@@ -90,7 +89,7 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
-          <div className="flex items-center">
+          <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex items-center group">
               <div className="w-[130px] h-[45px] relative mr-4 transition-all duration-300 group-hover:scale-105">
                 <Image
@@ -105,7 +104,7 @@ export function Header() {
           </div>
 
           {/* Desktop Layout */}
-          <div className="hidden md:flex items-center flex-1">
+          <div className="hidden md:flex items-center justify-center flex-1 mx-8">
             {/* Date and Time Section */}
             <div className="flex flex-col mr-8">
               <DateDisplay />
@@ -117,32 +116,20 @@ export function Header() {
             </div>
 
             {/* Search Bar */}
-            <div className="flex-1 max-w-xl">
-              <div className="relative w-full">
-                <Input
-                  type="search"
-                  placeholder="Cari berita..."
-                  className="w-full pr-10 bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-blue-50"
-                >
-                  <Search className="h-4 w-4 text-blue-600" />
-                </Button>
-              </div>
+            <div className="w-full max-w-xl">
+              <SearchBar />
             </div>
           </div>
 
           {/* User Actions */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-shrink-0">
             {/* Mobile Search Toggle */}
             <Button
               variant="ghost"
               size="sm"
               className="md:hidden text-gray-600 hover:text-blue-600 hover:bg-blue-50"
               onClick={() => setIsSearchOpen(!isSearchOpen)}
+              aria-label={isSearchOpen ? "Tutup pencarian" : "Buka pencarian"}
             >
               {isSearchOpen ? (
                 <X className="h-5 w-5" />
@@ -222,20 +209,8 @@ export function Header() {
         {/* Mobile Layout */}
         {isSearchOpen && (
           <div className="md:hidden py-4 border-t border-gray-100 bg-white">
-            <div className="relative mb-3">
-              <Input
-                type="search"
-                placeholder="Cari berita, topik, atau penulis..."
-                className="w-full pr-10 border-gray-300 focus:ring-2 focus:ring-blue-500"
-                autoFocus
-              />
-              <Button
-                size="sm"
-                variant="ghost"
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-blue-50"
-              >
-                <Search className="h-4 w-4 text-blue-600" />
-              </Button>
+            <div className="mb-3">
+              <SearchBar placeholder="Cari berita, topik, atau penulis..." />
             </div>
             <div className="flex flex-col space-y-2">
               <DateDisplay />

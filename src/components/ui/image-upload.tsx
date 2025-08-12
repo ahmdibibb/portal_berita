@@ -2,7 +2,6 @@
 
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -70,8 +69,10 @@ export function ImageUpload({
 
         onChange(data.imageUrl);
         toast.success("Gambar berhasil diupload");
-      } catch (error: any) {
-        toast.error("Upload gagal: " + error.message);
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Upload gagal";
+        toast.error("Upload gagal: " + errorMessage);
         console.error("Upload error:", error);
       } finally {
         setIsUploading(false);
@@ -164,7 +165,7 @@ export function ImageUpload({
               atau drag & drop
             </div>
             <p className="text-xs text-gray-500">{placeholder}</p>
-            <p className="text-xs text-gray-400">PNG, JPG, WebP hingga 5MB</p>
+            <p className="text-xs text-gray-400">PNG, JPG, WebP hingga 10MB</p>
           </div>
         </div>
       ) : (
