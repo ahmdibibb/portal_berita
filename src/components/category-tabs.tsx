@@ -52,12 +52,16 @@ export function CategoryTabs() {
   return (
     <div className="mb-8">
       <Tabs value={activeCategory} onValueChange={handleCategoryChange}>
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
-          <TabsTrigger key="all" value="all">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-2">
+          <TabsTrigger key="all" value="all" className="text-xs md:text-sm">
             Semua
           </TabsTrigger>
           {categories.map((category) => (
-            <TabsTrigger key={category.slug} value={category.slug}>
+            <TabsTrigger
+              key={category.slug}
+              value={category.slug}
+              className="text-xs md:text-sm"
+            >
               {category.name}
             </TabsTrigger>
           ))}

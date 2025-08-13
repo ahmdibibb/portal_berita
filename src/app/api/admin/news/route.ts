@@ -2,6 +2,49 @@ import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 
+export async function GET(request: NextRequest) {
+  try {
+    const auth = requireAuth(request);
+
+    if (!auth || auth.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get all news with relations using Prisma
+    const news = await prisma.news.findMany({
+      include: {
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        author: {
+          select: {
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return NextResponse.json(news);
+  } catch (error) {
+    console.error("Get admin news error:", error);
+    return NextResponse.json(
+      { error: "Gagal mengambil data berita" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const auth = requireAuth(request);

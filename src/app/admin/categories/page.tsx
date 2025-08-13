@@ -1,12 +1,47 @@
-import { CategoriesManagement } from "@/components/admin/categories-management"
-import { AdminGuard } from "@/components/admin/admin-guard"
+"use client";
+
+import { CategoriesManagement } from "@/components/admin/categories-management";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function CategoriesPage() {
   return (
-    <AdminGuard>
-      <div className="container py-8">
-        <CategoriesManagement />
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Link href="/admin">
+              <Button variant="outline" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Kembali
+              </Button>
+            </Link>
+          </div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Kelola Kategori Berita
+          </h1>
+          <p className="text-gray-600">
+            Tambah, edit, dan hapus kategori berita untuk organisasi yang lebih
+            baik
+          </p>
+        </div>
+
+        {/* Categories Management Component */}
+        <Card>
+          <CardContent className="p-6">
+            <CategoriesManagement />
+          </CardContent>
+        </Card>
       </div>
-    </AdminGuard>
-  )
-}   
+    </div>
+  );
+}

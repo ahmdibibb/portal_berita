@@ -13,6 +13,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface NewsLike {
   id: number;
@@ -56,6 +63,17 @@ export function LikesManagement() {
     return null;
   };
 
+  const chartData = data.map((item) => ({
+    title: item.title,
+    likes: item.likes,
+  }));
+
+  const totalLikes = data.reduce((sum, item) => sum + item.likes, 0);
+  const averageLikes = data.length > 0 ? totalLikes / data.length : 0;
+  const mostLikedNews = data.reduce((max, current) =>
+    current.likes > max.likes ? current : max
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -75,82 +93,89 @@ export function LikesManagement() {
         </Button>
       </div>
 
-      {loading ? (
-        <div className="h-80 flex items-center justify-center">
-          <p className="text-gray-500">Memuat data...</p>
-        </div>
-      ) : data.length === 0 ? (
-        <div className="h-80 flex items-center justify-center">
-          <p className="text-gray-500">Belum ada data likes</p>
-        </div>
-      ) : (
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={data}
-                margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis
-                  dataKey="title"
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                  fontSize={12}
-                  stroke="#666"
-                />
-                <YAxis fontSize={12} stroke="#666" />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar
-                  dataKey="likes"
-                  fill="#3b82f6"
-                  radius={[4, 4, 0, 0]}
-                  stroke="#2563eb"
-                  strokeWidth={1}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+      {/* Chart Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <Card className="md:col-span-2 lg:col-span-3 xl:col-span-4">
+          <CardHeader>
+            <CardTitle>Statistik Like Berita</CardTitle>
+            <CardDescription>Grafik jumlah like per berita</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="h-64 flex items-center justify-center">
+                <p>Memuat data...</p>
+              </div>
+            ) : chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="title" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="likes" fill="#3b82f6" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-64 flex items-center justify-center text-muted-foreground">
+                Tidak ada data like
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Ringkasan
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-blue-600 font-medium">
-                  Total Berita
-                </p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {data.length}
-                </p>
-              </div>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <p className="text-sm text-green-600 font-medium">
-                  Total Likes
-                </p>
-                <p className="text-2xl font-bold text-green-900">
-                  {data.reduce((sum, item) => sum + item.likes, 0)}
-                </p>
-              </div>
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <p className="text-sm text-purple-600 font-medium">
-                  Rata-rata Likes
-                </p>
-                <p className="text-2xl font-bold text-purple-900">
-                  {data.length > 0
-                    ? Math.round(
-                        data.reduce((sum, item) => sum + item.likes, 0) /
-                          data.length
-                      )
-                    : 0}
-                </p>
-              </div>
+        {/* Summary Cards */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Like</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">
+              {totalLikes.toLocaleString()}
             </div>
-          </div>
-        </div>
-      )}
+            <p className="text-xs text-muted-foreground">Semua berita</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Rata-rata</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {averageLikes.toFixed(1)}
+            </div>
+            <p className="text-xs text-muted-foreground">Per berita</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              Berita Terpopuler
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-purple-600">
+              {mostLikedNews?.title?.slice(0, 20)}...
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {mostLikedNews?.likes || 0} likes
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Berita</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">
+              {chartData.length}
+            </div>
+            <p className="text-xs text-muted-foreground">Berita dengan like</p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

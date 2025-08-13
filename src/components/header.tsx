@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/search-bar";
-import { User, LogOut, X, Clock, Search } from "lucide-react";
+import { User, LogOut, X, Search, Calendar, Clock } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,20 +14,33 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import Image from "next/image";
 
-const TimeZoneDisplay = ({ timezone }: { timezone: string }) => {
+const RealTimeClock = ({
+  timezone,
+  label,
+}: {
+  timezone: string;
+  label: string;
+}) => {
   const [time, setTime] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const updateTime = () => {
-      const options: Intl.DateTimeFormatOptions = {
-        timeZone: timezone,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      };
-      const formatter = new Intl.DateTimeFormat("id-ID", options);
-      setTime(formatter.format(new Date()));
+      try {
+        const now = new Date();
+        const options: Intl.DateTimeFormatOptions = {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+          timeZone: timezone,
+        };
+        const formatter = new Intl.DateTimeFormat("id-ID", options);
+        setTime(formatter.format(now));
+      } catch (error) {
+        setTime("--:--:--");
+      }
     };
 
     updateTime();
@@ -35,43 +48,62 @@ const TimeZoneDisplay = ({ timezone }: { timezone: string }) => {
     return () => clearInterval(interval);
   }, [timezone]);
 
-  const getZoneName = () => {
-    if (timezone === "Asia/Jakarta") return "WIB";
-    if (timezone === "Asia/Makassar") return "WITA";
-    if (timezone === "Asia/Jayapura") return "WIT";
-    return "";
-  };
+  if (!mounted) {
+    return (
+      <div className="flex items-center space-x-1.5 px-2 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-md">
+        <Clock className="h-3.5 w-3.5 text-blue-600" />
+        <span className="text-xs font-medium text-blue-800">
+          --:--:-- {label}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center space-x-1.5 px-2 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-md">
       <Clock className="h-3.5 w-3.5 text-blue-600" />
       <span className="text-xs font-medium text-blue-800">
-        {time} <span className="font-bold">{getZoneName()}</span>
+        {time} {label}
       </span>
     </div>
   );
 };
 
-const DateDisplay = () => {
+const RealTimeDate = () => {
   const [date, setDate] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const updateDate = () => {
-      const options: Intl.DateTimeFormatOptions = {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        timeZone: "Asia/Jakarta",
-      };
-      const formatter = new Intl.DateTimeFormat("id-ID", options);
-      setDate(formatter.format(new Date()));
+      try {
+        const now = new Date();
+        const options: Intl.DateTimeFormatOptions = {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          timeZone: "Asia/Jakarta",
+        };
+        const formatter = new Intl.DateTimeFormat("id-ID", options);
+        setDate(formatter.format(now));
+      } catch (error) {
+        setDate("Loading...");
+      }
     };
 
     updateDate();
-    const interval = setInterval(updateDate, 60000);
+    const interval = setInterval(updateDate, 60000); // Update setiap menit
     return () => clearInterval(interval);
   }, []);
+
+  if (!mounted) {
+    return (
+      <div className="text-sm font-medium text-gray-700 whitespace-nowrap">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="text-sm font-medium text-gray-700 whitespace-nowrap">
@@ -82,7 +114,57 @@ const DateDisplay = () => {
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50 backdrop-blur-sm bg-opacity-90">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo Section */}
+            <div className="flex items-center flex-shrink-0">
+              <div className="w-[130px] h-[45px] relative mr-4">
+                <div className="w-full h-full bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Desktop Layout */}
+            <div className="hidden md:flex items-center justify-center flex-1 mx-8">
+              {/* Date and Time Section */}
+              <div className="flex flex-col mr-8">
+                <div className="text-sm font-medium text-gray-300">
+                  Loading...
+                </div>
+                <div className="flex space-x-2 mt-1">
+                  <div className="flex items-center space-x-1.5 px-2 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-md">
+                    <Clock className="h-3.5 w-3.5 text-blue-600" />
+                    <span className="text-xs font-medium text-blue-800">
+                      --:--:-- WIB
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="w-full max-w-xl">
+                <div className="w-full h-10 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* User Actions */}
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50 backdrop-blur-sm bg-opacity-90">
@@ -107,11 +189,11 @@ export function Header() {
           <div className="hidden md:flex items-center justify-center flex-1 mx-8">
             {/* Date and Time Section */}
             <div className="flex flex-col mr-8">
-              <DateDisplay />
+              <RealTimeDate />
               <div className="flex space-x-2 mt-1">
-                <TimeZoneDisplay timezone="Asia/Jakarta" />
-                <TimeZoneDisplay timezone="Asia/Makassar" />
-                <TimeZoneDisplay timezone="Asia/Jayapura" />
+                <RealTimeClock timezone="Asia/Jakarta" label="WIB" />
+                <RealTimeClock timezone="Asia/Makassar" label="WITA" />
+                <RealTimeClock timezone="Asia/Jayapura" label="WIT" />
               </div>
             </div>
 
@@ -167,7 +249,7 @@ export function Header() {
                   {user.role === "admin" && (
                     <DropdownMenuItem asChild>
                       <Link
-                        href="/admin/news"
+                        href="/admin"
                         className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-blue-50"
                       >
                         <User className="mr-2 h-4 w-4" />
@@ -212,12 +294,13 @@ export function Header() {
             <div className="mb-3">
               <SearchBar placeholder="Cari berita, topik, atau penulis..." />
             </div>
+            {/* Mobile Date and Time Display */}
             <div className="flex flex-col space-y-2">
-              <DateDisplay />
+              <RealTimeDate />
               <div className="flex justify-between space-x-2">
-                <TimeZoneDisplay timezone="Asia/Jakarta" />
-                <TimeZoneDisplay timezone="Asia/Makassar" />
-                <TimeZoneDisplay timezone="Asia/Jayapura" />
+                <RealTimeClock timezone="Asia/Jakarta" label="WIB" />
+                <RealTimeClock timezone="Asia/Makassar" label="WITA" />
+                <RealTimeClock timezone="Asia/Jayapura" label="WIT" />
               </div>
             </div>
           </div>

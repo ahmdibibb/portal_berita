@@ -58,38 +58,8 @@ export default function RootLayout({
             {/* Main Content with Container */}
             <main className="flex-1">
               <div className="container mx-auto px-4 py-8">
-                <div className="grid grid-cols-12 gap-6">
-                  {/* Main Content Area (2/3 width) */}
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="bg-white rounded-lg shadow-sm border border-blue-50 p-6">
-                      {children}
-                    </div>
-                  </div>
-
-                  {/* Sidebar (1/3 width) */}
-                  <aside className="hidden lg:block lg:col-span-4">
-                    <div className="bg-white p-6 rounded-lg shadow-sm border border-blue-50 sticky top-24">
-                      <h3 className="font-serif text-xl font-bold mb-4 pb-2 border-b border-blue-100 text-blue-800">
-                        Berita Terpopuler
-                      </h3>
-                      {/* Popular news */}
-                      <div className="space-y-4">
-                        {[1, 2, 3, 4].map((item) => (
-                          <div
-                            key={item}
-                            className="border-b border-blue-50 pb-4 last:border-0"
-                          >
-                            <p className="text-xs font-medium text-blue-500 mb-1">
-                              #{item} Trending
-                            </p>
-                            <h4 className="font-medium text-blue-800 hover:text-blue-600 transition-colors">
-                              Judul Berita Terpopuler {item}
-                            </h4>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </aside>
+                <div className="bg-white rounded-lg shadow-sm border border-blue-50 p-6">
+                  {children}
                 </div>
               </div>
             </main>

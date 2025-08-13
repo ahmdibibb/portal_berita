@@ -38,7 +38,7 @@ export function PopularNews() {
           const sorted = [...allNews].sort(
             (a, b) => (b._count?.likes ?? 0) - (a._count?.likes ?? 0)
           );
-          setPopularNews(sorted.slice(0, 3));
+          setPopularNews(sorted.slice(0, 4)); // Changed from 3 to 4
         }
       } catch (error) {
         console.error("Failed to fetch popular news:", error);
@@ -54,10 +54,10 @@ export function PopularNews() {
     return (
       <div>
         <h2 className="text-3xl font-bold mb-6">Berita Populer</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="space-y-4">
-              <Skeleton className="h-48 w-full" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="space-y-3">
+              <Skeleton className="h-40 w-full" />
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-4 w-1/2" />
             </div>
@@ -70,7 +70,7 @@ export function PopularNews() {
   return (
     <div>
       <h2 className="text-3xl font-bold mb-6">Berita Populer</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {popularNews.map((news) => (
           <NewsCard
             key={news.id}

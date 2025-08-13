@@ -1,7 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function Footer() {
+  const [currentYear, setCurrentYear] = useState("");
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear().toString());
+  }, []);
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
@@ -111,7 +120,7 @@ export function Footer() {
         <div className="border-t border-gray-800 mt-12 pt-8 text-center">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm">
-              &copy; {new Date().getFullYear()} Portal Berita. Semua hak
+              &copy; {currentYear || "2025"} Portal Berita. Semua hak
               dilindungi.
             </p>
             <div className="flex flex-wrap gap-4 justify-center md:justify-end text-xs">

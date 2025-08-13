@@ -34,7 +34,7 @@ export function NewsGrid({ category }: NewsGridProps) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const limit = 9;
+  const limit = 12; // Increased from 9 to 12 for 4 columns
 
   const fetchNews = async (pageToLoad: number) => {
     try {
@@ -81,10 +81,10 @@ export function NewsGrid({ category }: NewsGridProps) {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="space-y-4">
-            <Skeleton className="h-48 w-full" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="space-y-3">
+            <Skeleton className="h-40 w-full" />
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-4 w-1/2" />
           </div>
@@ -95,7 +95,7 @@ export function NewsGrid({ category }: NewsGridProps) {
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {news.map((article) => (
           <NewsCard
             key={article.id}
