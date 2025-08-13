@@ -37,9 +37,10 @@ export function LikesManagement() {
       const response = await fetch("/api/admin/news/likes");
       if (!response.ok) throw new Error("Failed to fetch likes data");
       const result = await response.json();
-      setData(result);
+      setData(result || []); // Ensure we always have an array
     } catch (error) {
       toast.error("Gagal memuat data likes");
+      setData([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -63,16 +64,32 @@ export function LikesManagement() {
     return null;
   };
 
-  const chartData = data.map((item) => ({
-    title: item.title,
-    likes: item.likes,
-  }));
+  // Safe data processing with proper checks
+  const chartData =
+    data && data.length > 0
+      ? data.map((item) => ({
+          title: item.title,
+          likes: item.likes,
+        }))
+      : [];
 
-  const totalLikes = data.reduce((sum, item) => sum + item.likes, 0);
-  const averageLikes = data.length > 0 ? totalLikes / data.length : 0;
-  const mostLikedNews = data.reduce((max, current) =>
-    current.likes > max.likes ? current : max
-  );
+  // Safe calculations with proper initial values
+  const totalLikes =
+    data && data.length > 0
+      ? data.reduce((sum, item) => sum + (item.likes || 0), 0)
+      : 0;
+  const averageLikes = data && data.length > 0 ? totalLikes / data.length : 0;
+
+  // Safe most liked news calculation
+  const mostLikedNews =
+    data && data.length > 0
+      ? data.reduce((max, current) => {
+          if (!max || (current.likes || 0) > (max.likes || 0)) {
+            return current;
+          }
+          return max;
+        }, data[0])
+      : null;
 
   return (
     <div className="space-y-6">
@@ -156,7 +173,9 @@ export function LikesManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">
-              {mostLikedNews?.title?.slice(0, 20)}...
+              {mostLikedNews?.title
+                ? `${mostLikedNews.title.slice(0, 20)}...`
+                : "Tidak ada data"}
             </div>
             <p className="text-xs text-muted-foreground">
               {mostLikedNews?.likes || 0} likes
