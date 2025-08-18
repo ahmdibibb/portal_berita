@@ -4,7 +4,17 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/search-bar";
-import { User, LogOut, X, Search, Calendar, Clock } from "lucide-react";
+import {
+  User,
+  LogOut,
+  X,
+  Search,
+  Calendar,
+  Clock,
+  Bell,
+  Menu,
+  Globe,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,9 +60,9 @@ const RealTimeClock = ({
 
   if (!mounted) {
     return (
-      <div className="flex items-center space-x-1.5 px-2 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-md">
-        <Clock className="h-3.5 w-3.5 text-blue-600" />
-        <span className="text-xs font-medium text-blue-800">
+      <div className="flex items-center space-x-1.5 px-2 py-1 bg-blue-900/20 rounded-md">
+        <Clock className="h-3.5 w-3.5 text-blue-300" />
+        <span className="text-xs font-medium text-blue-200">
           --:--:-- {label}
         </span>
       </div>
@@ -60,9 +70,9 @@ const RealTimeClock = ({
   }
 
   return (
-    <div className="flex items-center space-x-1.5 px-2 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-md">
-      <Clock className="h-3.5 w-3.5 text-blue-600" />
-      <span className="text-xs font-medium text-blue-800">
+    <div className="flex items-center space-x-1.5 px-2 py-1 bg-blue-900/20 rounded-md">
+      <Clock className="h-3.5 w-3.5 text-blue-300" />
+      <span className="text-xs font-medium text-blue-200">
         {time} {label}
       </span>
     </div>
@@ -99,14 +109,14 @@ const RealTimeDate = () => {
 
   if (!mounted) {
     return (
-      <div className="text-sm font-medium text-gray-700 whitespace-nowrap">
+      <div className="text-sm font-medium text-blue-200 whitespace-nowrap">
         Loading...
       </div>
     );
   }
 
   return (
-    <div className="text-sm font-medium text-gray-700 whitespace-nowrap">
+    <div className="text-sm font-medium text-blue-200 whitespace-nowrap">
       {date}
     </div>
   );
@@ -123,13 +133,13 @@ export function Header() {
 
   if (!mounted) {
     return (
-      <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50 backdrop-blur-sm bg-opacity-90">
+      <header className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 shadow-lg border-b border-blue-700 sticky top-0 z-50">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20">
             {/* Logo Section */}
             <div className="flex items-center flex-shrink-0">
               <div className="w-[130px] h-[45px] relative mr-4">
-                <div className="w-full h-full bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-full h-full bg-blue-700 rounded animate-pulse"></div>
               </div>
             </div>
 
@@ -137,13 +147,13 @@ export function Header() {
             <div className="hidden md:flex items-center justify-center flex-1 mx-8">
               {/* Date and Time Section */}
               <div className="flex flex-col mr-8">
-                <div className="text-sm font-medium text-gray-300">
+                <div className="text-sm font-medium text-blue-300">
                   Loading...
                 </div>
                 <div className="flex space-x-2 mt-1">
-                  <div className="flex items-center space-x-1.5 px-2 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-md">
-                    <Clock className="h-3.5 w-3.5 text-blue-600" />
-                    <span className="text-xs font-medium text-blue-800">
+                  <div className="flex items-center space-x-1.5 px-2 py-1 bg-blue-900/20 rounded-md">
+                    <Clock className="h-3.5 w-3.5 text-blue-300" />
+                    <span className="text-xs font-medium text-blue-200">
                       --:--:-- WIB
                     </span>
                   </div>
@@ -152,13 +162,13 @@ export function Header() {
 
               {/* Search Bar */}
               <div className="w-full max-w-xl">
-                <div className="w-full h-10 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-full h-12 bg-blue-700 rounded animate-pulse"></div>
               </div>
             </div>
 
             {/* User Actions */}
             <div className="flex items-center space-x-2 flex-shrink-0">
-              <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+              <div className="w-20 h-8 bg-blue-700 rounded animate-pulse"></div>
             </div>
           </div>
         </div>
@@ -167,9 +177,9 @@ export function Header() {
   }
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50 backdrop-blur-sm bg-opacity-90">
+    <header className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 shadow-lg border-b border-blue-700 sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo Section */}
           <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex items-center group">
@@ -199,17 +209,19 @@ export function Header() {
 
             {/* Search Bar */}
             <div className="w-full max-w-xl">
-              <SearchBar />
+              <div className="relative">
+                <SearchBar placeholder="Cari berita, topik, atau penulis..." />
+              </div>
             </div>
           </div>
 
           {/* User Actions */}
-          <div className="flex items-center space-x-2 flex-shrink-0">
+          <div className="flex items-center space-x-3 flex-shrink-0">
             {/* Mobile Search Toggle */}
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+              className="md:hidden text-blue-200 hover:text-white hover:bg-blue-700/50"
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               aria-label={isSearchOpen ? "Tutup pencarian" : "Buka pencarian"}
             >
@@ -226,12 +238,12 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="flex items-center space-x-1.5 hover:bg-blue-50"
+                    className="flex items-center space-x-1.5 text-blue-200 hover:text-white hover:bg-blue-700/50"
                   >
-                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                      <User className="h-4 w-4 text-blue-600" />
+                    <div className="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center">
+                      <User className="h-4 w-4 text-blue-200" />
                     </div>
-                    <span className="hidden sm:inline text-sm font-medium text-gray-700">
+                    <span className="hidden sm:inline text-sm font-medium">
                       {user.name.split(" ")[0]}
                     </span>
                   </Button>
@@ -270,18 +282,18 @@ export function Header() {
               <div className="flex items-center space-x-2">
                 <Button
                   asChild
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="border-gray-300 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300"
+                  className="text-blue-200 hover:text-white hover:bg-blue-700/50 px-3 py-2"
                 >
-                  <Link href="/auth/login">Masuk</Link>
+                  <Link href="/auth/login">SIGN IN</Link>
                 </Button>
                 <Button
                   asChild
                   size="sm"
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-sm"
+                  className="bg-white text-blue-900 hover:bg-gray-100 shadow-sm px-4 py-2 font-medium"
                 >
-                  <Link href="/auth/register">Daftar</Link>
+                  <Link href="/auth/register">CREATE FREE ACCOUNT</Link>
                 </Button>
               </div>
             )}
@@ -290,7 +302,7 @@ export function Header() {
 
         {/* Mobile Layout */}
         {isSearchOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100 bg-white">
+          <div className="md:hidden py-4 border-t border-blue-700 bg-blue-800/50">
             <div className="mb-3">
               <SearchBar placeholder="Cari berita, topik, atau penulis..." />
             </div>
