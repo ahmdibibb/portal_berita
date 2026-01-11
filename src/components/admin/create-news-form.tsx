@@ -68,7 +68,7 @@ export function CreateNewsForm() {
       try {
         const response = await fetch("/api/categories");
         if (response.ok) {
-          const data = await response.json();
+        const data = await response.json();
           // Gabungkan kategori dari API dengan default, hapus duplikat
           const apiCategories = data || [];
           const allCategories = [...defaultCategories, ...apiCategories];
@@ -297,7 +297,7 @@ export function CreateNewsForm() {
                       key={category.id}
                       value={category.id.toString()}
                     >
-                      {category.name}
+                    {category.name}
                     </SelectItem>
                   ))
                 ) : (

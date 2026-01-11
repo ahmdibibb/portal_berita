@@ -20,28 +20,28 @@ export default function RegisterPage() {
             </Link>
             <h2 className="mt-2 text-2xl font-semibold text-gray-900">
               Buat Akun Baru
-            </h2>
+        </h2>
             <p className="text-sm text-gray-500">
               Gabung untuk menikmati fitur lengkap
             </p>
-          </div>
+      </div>
 
           <div className="mt-6">
-            <RegisterForm />
-            <div className="mt-6 text-center text-sm">
-              <p className="text-gray-600">
+          <RegisterForm />
+          <div className="mt-6 text-center text-sm">
+            <p className="text-gray-600">
                 Sudah punya akun?{" "}
-                <Link
-                  href="/auth/login"
-                  className="font-medium text-red-600 hover:text-red-500"
-                >
+              <Link 
+                href="/auth/login" 
+                className="font-medium text-red-600 hover:text-red-500"
+              >
                   Masuk di sini
-                </Link>
-              </p>
-            </div>
+              </Link>
+            </p>
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

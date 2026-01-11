@@ -116,6 +116,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -204,9 +205,11 @@
 
 /* News specific styling - Enhanced for better paragraph structure */
 .news-content {
-  @apply text-lg leading-relaxed max-w-4xl mx-auto;
-  font-family: var(--font-sans);
+  @apply text-xl leading-9 max-w-4xl mx-auto;
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
   color: var(--foreground);
+  white-space: pre-line;
+  /* Respect newlines in content */
 }
 
 /* Ensure proper text rendering */
@@ -218,29 +221,30 @@
 
 /* First paragraph styling - Lead paragraph */
 .news-content p:first-of-type {
-  @apply text-xl leading-8 font-medium text-muted-foreground mb-8;
-  text-indent: 0;
+  @apply text-xl leading-9 font-medium text-foreground mb-8;
   max-width: 100%;
+  text-align: justify;
 }
 
-/* First letter drop cap effect */
+/* First letter drop cap effect - REMOVED for CNN style */
+/* 
 .news-content p:first-of-type::first-letter {
   @apply text-5xl font-bold text-primary float-left mr-3 mt-1;
   font-family: var(--font-serif);
   line-height: 0.8;
-}
+} 
+*/
 
 /* Regular paragraph styling */
 .news-content p:not(:first-of-type) {
-  @apply text-base leading-8 mb-6 text-foreground;
+  @apply text-xl leading-9 mb-8 text-foreground;
   text-indent: 0;
   max-width: 100%;
   word-wrap: break-word;
   hyphens: auto;
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
-  text-align: left;
-  line-height: 1.75;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  text-align: justify;
   font-weight: 400;
 }
 
@@ -251,9 +255,9 @@
 }
 
 /* First paragraph after heading */
-.news-content h2 + p,
-.news-content h3 + p,
-.news-content h4 + p {
+.news-content h2+p,
+.news-content h3+p,
+.news-content h4+p {
   margin-top: 1rem;
 }
 
@@ -263,19 +267,19 @@
 }
 
 /* Paragraph spacing and structure */
-.news-content p + p {
+.news-content p+p {
   @apply mt-6;
 }
 
-.news-content p + h2,
-.news-content p + h3,
-.news-content p + h4 {
+.news-content p+h2,
+.news-content p+h3,
+.news-content p+h4 {
   @apply mt-10;
 }
 
-.news-content h2 + p,
-.news-content h3 + p,
-.news-content h4 + p {
+.news-content h2+p,
+.news-content h3+p,
+.news-content h4+p {
   @apply mt-4;
 }
 
@@ -328,31 +332,31 @@
 }
 
 /* List and paragraph spacing */
-.news-content ul + p,
-.news-content ol + p {
+.news-content ul+p,
+.news-content ol+p {
   @apply mt-6;
 }
 
-.news-content p + ul,
-.news-content p + ol {
+.news-content p+ul,
+.news-content p+ol {
   @apply mt-4;
 }
 
 /* Blockquote and paragraph spacing */
-.news-content p + blockquote {
+.news-content p+blockquote {
   @apply mt-6;
 }
 
-.news-content blockquote + p {
+.news-content blockquote+p {
   @apply mt-6;
 }
 
 /* Image and paragraph spacing */
-.news-content p + img {
+.news-content p+img {
   @apply mt-6;
 }
 
-.news-content img + p {
+.news-content img+p {
   @apply mt-6;
 }
 
@@ -435,7 +439,7 @@
     @apply mb-4 leading-6;
   }
 
-  .news-content p + p {
+  .news-content p+p {
     @apply mt-4;
   }
 
@@ -458,6 +462,7 @@
     opacity: 0;
     transform: translateY(8px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -472,9 +477,11 @@
 .pressable {
   transition: transform 150ms ease, box-shadow 200ms ease;
 }
+
 .pressable:hover {
   box-shadow: 0 6px 24px -8px rgba(0, 0, 0, 0.15);
 }
+
 .pressable:active {
   transform: scale(0.98);
 }
@@ -484,6 +491,7 @@
   0% {
     transform: translateX(-60%);
   }
+
   100% {
     transform: translateX(0%);
   }
@@ -496,11 +504,9 @@
   right: 0;
   height: 3px;
   z-index: 60;
-  background: linear-gradient(
-    to right,
-    oklch(0.828 0.189 84.429),
-    oklch(0.6 0.118 184.704)
-  );
+  background: linear-gradient(to right,
+      oklch(0.828 0.189 84.429),
+      oklch(0.6 0.118 184.704));
   transform-origin: left;
 }
 
@@ -508,12 +514,10 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.6),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.6),
+      transparent);
   animation: route-progress-loading 1s ease-in-out infinite;
 }
 
@@ -522,39 +526,34 @@
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
 }
 
 .shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.04) 25%,
-    rgba(0, 0, 0, 0.06) 37%,
-    rgba(0, 0, 0, 0.04) 63%
-  );
+  background: linear-gradient(90deg,
+      rgba(0, 0, 0, 0.04) 25%,
+      rgba(0, 0, 0, 0.06) 37%,
+      rgba(0, 0, 0, 0.04) 63%);
   background-size: 200% 100%;
   animation: shimmer-scan 1.2s ease-in-out infinite;
 }
 
 /* Dark mode shimmer */
 .dark .shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.08) 37%,
-    rgba(255, 255, 255, 0.04) 63%
-  );
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.04) 25%,
+      rgba(255, 255, 255, 0.08) 37%,
+      rgba(255, 255, 255, 0.04) 63%);
 }
 
 /* Dark mode specific enhancements */
 .dark .bg-gradient-to-b {
-  background: linear-gradient(
-    to bottom,
-    oklch(0.08 0.002 240),
-    oklch(0.12 0.003 240)
-  );
+  background: linear-gradient(to bottom,
+      oklch(0.08 0.002 240),
+      oklch(0.12 0.003 240));
 }
 
 .dark .shadow-lg {
