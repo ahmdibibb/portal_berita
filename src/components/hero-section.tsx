@@ -43,15 +43,15 @@ export function HeroSection() {
   if (!item) return null;
 
   return (
-    <section className="mb-8">
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <section className="mb-8 animate-fade-in-up">
+      <div className="bg-white dark:bg-card rounded-lg shadow-sm overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-2">
-          <div className="relative h-64 lg:h-96">
+          <div className="relative h-64 lg:h-96 group">
             <Image
               src={item.image || "/placeholder.svg"}
               alt={item.title}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             />
             <div className="absolute top-4 left-4">
               <Badge variant="destructive" className="bg-red-600">
@@ -62,15 +62,19 @@ export function HeroSection() {
           <div className="p-6 lg:p-8 flex flex-col justify-center">
             <div className="flex items-center space-x-2 mb-3">
               <Badge variant="secondary">{item.category.name}</Badge>
-              <span className="text-xs text-gray-500">•</span>
-              <span className="text-xs text-gray-500">Terbaru</span>
+              <span className="text-xs text-gray-500 dark:text-muted-foreground">
+                •
+              </span>
+              <span className="text-xs text-gray-500 dark:text-muted-foreground">
+                Terbaru
+              </span>
             </div>
 
-            <h1 className="text-2xl lg:text-3xl font-bold mb-4 leading-tight text-gray-900">
+            <h1 className="text-2xl lg:text-3xl font-bold mb-4 leading-tight text-gray-900 dark:text-foreground">
               {item.title}
             </h1>
 
-            <p className="text-gray-600 mb-6 line-clamp-3 leading-relaxed">
+            <p className="text-gray-600 dark:text-muted-foreground mb-6 line-clamp-3 leading-relaxed">
               {item.excerpt}
             </p>
 

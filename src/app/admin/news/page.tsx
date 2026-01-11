@@ -76,6 +76,28 @@ export default function NewsManagementPage() {
     }
   };
 
+  const handleDelete = async (newsId: number, title: string) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus berita "${title}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/news/${newsId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete news");
+      }
+
+      toast.success("Berita berhasil dihapus");
+      // Refresh data setelah delete
+      fetchNews();
+    } catch (error) {
+      toast.error("Gagal menghapus berita");
+    }
+  };
+
   useEffect(() => {
     fetchNews();
   }, []);
@@ -301,6 +323,9 @@ export default function NewsManagementPage() {
                             size="sm"
                             variant="outline"
                             className="text-destructive hover:text-destructive"
+                            onClick={() =>
+                              handleDelete(newsItem.id, newsItem.title)
+                            }
                           >
                             <Trash2 className="h-4 w-4 mr-1" />
                             Hapus

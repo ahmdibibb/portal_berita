@@ -146,20 +146,20 @@ export function SearchResults({
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-fade-in-up">
         {Array.from({ length: 6 }).map((_, i) => (
           <Card key={i}>
             <CardContent className="p-6">
               <div className="flex gap-4">
-                <Skeleton className="h-24 w-32 rounded-lg" />
+                <Skeleton className="h-24 w-32 rounded-lg shimmer" />
                 <div className="flex-1 space-y-3">
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-6 w-3/4 shimmer" />
+                  <Skeleton className="h-4 w-full shimmer" />
+                  <Skeleton className="h-4 w-2/3 shimmer" />
                   <div className="flex gap-4">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-4 w-16" />
-                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-20 shimmer" />
+                    <Skeleton className="h-4 w-16 shimmer" />
+                    <Skeleton className="h-4 w-24 shimmer" />
                   </div>
                 </div>
               </div>
@@ -208,7 +208,7 @@ export function SearchResults({
   const totalPages = Math.ceil(totalResults / 12);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Results Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -236,8 +236,12 @@ export function SearchResults({
 
       {/* Search Results */}
       <div className="space-y-4">
-        {results.map((news) => (
-          <Card key={news.id} className="hover:shadow-md transition-shadow">
+        {results.map((news, index) => (
+          <Card
+            key={news.id}
+            className="hover:shadow-md transition-shadow animate-fade-in-up"
+            style={{ ["--i" as any]: index, animationDelay: `${index * 60}ms` }}
+          >
             <CardContent className="p-6">
               <div className="flex gap-4">
                 {/* News Image */}

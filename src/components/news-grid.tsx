@@ -94,23 +94,33 @@ export function NewsGrid({ category }: NewsGridProps) {
   }
 
   return (
-    <div>
+    <div className="animate-fade-in-up">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {news.map((article) => (
-          <NewsCard
+        {news.map((article, index) => (
+          <div
             key={article.id}
-            news={{
-              id: article.id,
-              title: article.title,
-              excerpt: article.excerpt,
-              category: article.category.name, // Extract name from category object
-              image: article.image ?? "/placeholder.svg",
-              publishedAt: article.publishedAt,
-              author: article.author.name, // Extract name from author object
-              likes: article._count?.likes ?? 0,
-              comments: article._count?.comments ?? 0,
-            }}
-          />
+            className="[animation-delay:calc(var(--i)*60ms)] animate-fade-in-up"
+            style={
+              {
+                // @ts-ignore custom property for staggering
+                "--i": index,
+              } as React.CSSProperties
+            }
+          >
+            <NewsCard
+              news={{
+                id: article.id,
+                title: article.title,
+                excerpt: article.excerpt,
+                category: article.category.name, // Extract name from category object
+                image: article.image ?? "/placeholder.svg",
+                publishedAt: article.publishedAt,
+                author: article.author.name, // Extract name from author object
+                likes: article._count?.likes ?? 0,
+                comments: article._count?.comments ?? 0,
+              }}
+            />
+          </div>
         ))}
       </div>
 

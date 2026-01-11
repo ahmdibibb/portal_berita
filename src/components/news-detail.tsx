@@ -98,12 +98,8 @@ export function NewsDetail({ newsId }: NewsDetailProps) {
       </div>
 
       <div
-        className="prose prose-lg max-w-none news-content"
+        className="news-content"
         dangerouslySetInnerHTML={{ __html: news.content }}
-        style={{
-          lineHeight: "1.8",
-          textAlign: "left",
-        }}
       />
     </article>
   );

@@ -90,11 +90,17 @@ export function AdminDashboard() {
   return (
     <div className="space-y-8">
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <Button asChild className="md:col-span-2 lg:col-span-1">
           <Link href="/admin/news/create">
             <PlusCircle className="h-4 w-4 mr-2" />
             Tambah Berita Baru
+          </Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/admin/news">
+            <FileText className="h-4 w-4 mr-2" />
+            Kelola Berita
           </Link>
         </Button>
         <Button variant="outline" asChild>

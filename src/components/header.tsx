@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
 import Image from "next/image";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const RealTimeClock = ({
   timezone,
@@ -177,13 +178,13 @@ export function Header() {
   }
 
   return (
-    <header className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 shadow-lg border-b border-blue-700 sticky top-0 z-50">
+    <header className="bg-gradient-to-r from-blue-900/95 via-blue-800/95 to-blue-900/95 backdrop-blur supports-[backdrop-filter]:backdrop-blur-md shadow-lg border-b border-blue-700/70 sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo Section */}
           <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex items-center group">
-              <div className="w-[130px] h-[45px] relative mr-4 transition-all duration-300 group-hover:scale-105">
+              <div className="w-[130px] h-[45px] relative mr-4 transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src="/Logo.svg"
                   alt="Portal Berita"
@@ -217,11 +218,14 @@ export function Header() {
 
           {/* User Actions */}
           <div className="flex items-center space-x-3 flex-shrink-0">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* Mobile Search Toggle */}
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden text-blue-200 hover:text-white hover:bg-blue-700/50"
+              className="md:hidden text-blue-200 hover:text-white hover:bg-blue-700/50 pressable"
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               aria-label={isSearchOpen ? "Tutup pencarian" : "Buka pencarian"}
             >
@@ -238,7 +242,7 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="flex items-center space-x-1.5 text-blue-200 hover:text-white hover:bg-blue-700/50"
+                    className="flex items-center space-x-1.5 text-blue-200 hover:text-white hover:bg-blue-700/50 pressable"
                   >
                     <div className="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center">
                       <User className="h-4 w-4 text-blue-200" />
@@ -284,14 +288,14 @@ export function Header() {
                   asChild
                   variant="ghost"
                   size="sm"
-                  className="text-blue-200 hover:text-white hover:bg-blue-700/50 px-3 py-2"
+                  className="text-blue-200 hover:text-white hover:bg-blue-700/50 px-3 py-2 pressable"
                 >
                   <Link href="/auth/login">SIGN IN</Link>
                 </Button>
                 <Button
                   asChild
                   size="sm"
-                  className="bg-white text-blue-900 hover:bg-gray-100 shadow-sm px-4 py-2 font-medium"
+                  className="bg-white text-blue-900 hover:bg-gray-100 shadow-sm px-4 py-2 font-medium pressable"
                 >
                   <Link href="/auth/register">CREATE FREE ACCOUNT</Link>
                 </Button>
@@ -302,7 +306,7 @@ export function Header() {
 
         {/* Mobile Layout */}
         {isSearchOpen && (
-          <div className="md:hidden py-4 border-t border-blue-700 bg-blue-800/50">
+          <div className="md:hidden py-4 border-t border-blue-700/70 bg-blue-800/40 animate-fade-in-up">
             <div className="mb-3">
               <SearchBar placeholder="Cari berita, topik, atau penulis..." />
             </div>

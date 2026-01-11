@@ -12,15 +12,15 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-12">
+    <footer className="bg-gray-900 dark:bg-gray-950 text-white">
+      <div className="container mx-auto px-4 py-12 animate-fade-in-up">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-14">
           {/* Brand Section */}
           <div className="space-y-4 flex flex-col items-center lg:items-start text-center lg:text-left">
             <h3 className="text-xl font-bold font-serif text-white">
               Portal Berita
             </h3>
-            <p className="text-gray-400 leading-relaxed">
+            <p className="text-gray-400 dark:text-gray-300 leading-relaxed">
               Sumber berita terpercaya dengan informasi terkini dari berbagai
               kategori.
             </p>
@@ -117,7 +117,7 @@ export function Footer() {
         </div>
 
         {/* Copyright Section */}
-        <div className="border-t border-gray-800 mt-12 pt-8 text-center">
+        <div className="border-t border-gray-800/80 mt-12 pt-8 text-center">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm">
               &copy; {currentYear || "2025"} Portal Berita. Semua hak

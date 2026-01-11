@@ -25,11 +25,11 @@ export function Navbar() {
   const [activeCategory, setActiveCategory] = useState("");
 
   return (
-    <nav className="bg-gradient-to-r from-blue-800 via-blue-700 to-blue-800 border-b border-blue-600 shadow-lg">
+    <nav className="bg-gradient-to-r from-blue-800/95 via-blue-700/95 to-blue-800/95 backdrop-blur supports-[backdrop-filter]:backdrop-blur-md border-b border-blue-600/70 shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Desktop Navigation - Centered */}
-          <div className="hidden lg:flex items-center justify-center flex-1">
+          <div className="hidden lg:flex items-center justify-center flex-1 animate-fade-in-up">
             {categories.map((category) => (
               <Link
                 key={category.name}
@@ -65,7 +65,7 @@ export function Navbar() {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-blue-600 bg-blue-700/30">
+          <div className="lg:hidden py-4 border-t border-blue-600/70 bg-blue-700/30 animate-fade-in-up">
             {/* Main Categories Grid */}
             <div className="grid grid-cols-2 gap-2">
               {categories.map((category) => (

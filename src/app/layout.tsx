@@ -5,7 +5,8 @@ import "@/app/globals.css";
 import { Header } from "@/components/header";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { AuthProvider } from "@/components/auth-provider";
+import { AuthProvider, RouteProgress } from "@/components/auth-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 
 // Font setup
@@ -47,40 +48,46 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-sans bg-blue-50/10">
-        <AuthProvider>
-          <div className="min-h-screen flex flex-col">
-            {/* Sticky Header with subtle shadow */}
-            <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-blue-100">
-              <Header />
-              <Navbar />
+        <ThemeProvider>
+          <AuthProvider>
+            <div className="min-h-screen flex flex-col">
+              {/* Sticky Header with subtle shadow */}
+              <div className="sticky top-0 z-50 bg-white dark:bg-card shadow-sm border-b border-blue-100 dark:border-border">
+                {/* Route Progress Bar */}
+                <div id="route-progress" className="route-progress hidden" />
+                <Header />
+                <Navbar />
+                {/* Route progress controller */}
+                <RouteProgress />
+              </div>
+
+              {/* Main Content with Container */}
+              <main className="flex-1">
+                <div className="container mx-auto px-4 py-8">
+                  <div className="bg-white dark:bg-card rounded-lg shadow-sm border border-blue-50 dark:border-border p-6">
+                    {children}
+                  </div>
+                </div>
+              </main>
+
+              {/* Footer */}
+              <Footer />
             </div>
 
-            {/* Main Content with Container */}
-            <main className="flex-1">
-              <div className="container mx-auto px-4 py-8">
-                <div className="bg-white rounded-lg shadow-sm border border-blue-50 p-6">
-                  {children}
-                </div>
-              </div>
-            </main>
-
-            {/* Footer */}
-            <Footer />
-          </div>
-
-          {/* Notification Toast */}
-          <Toaster
-            position="top-center"
-            richColors
-            closeButton
-            toastOptions={{
-              style: {
-                border: "1px solid #EFF6FF",
-                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
-              },
-            }}
-          />
-        </AuthProvider>
+            {/* Notification Toast */}
+            <Toaster
+              position="top-center"
+              richColors
+              closeButton
+              toastOptions={{
+                style: {
+                  border: "1px solid #EFF6FF",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+                },
+              }}
+            />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

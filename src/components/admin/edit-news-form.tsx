@@ -15,11 +15,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Link as LinkIcon } from "lucide-react";
+import { Loader2, Link as LinkIcon, ArrowLeft } from "lucide-react";
 
 interface Category {
   id: number;
   name: string;
+}
+
+interface NewsData {
+  id: number;
+  title: string;
+  excerpt: string;
+  content: string;
+  categoryId: number;
+  image: string | null;
+  slug: string;
+  status: string;
 }
 
 // Default categories sesuai dengan yang ada di project
@@ -37,7 +48,11 @@ const defaultCategories: Category[] = [
   { id: 11, name: "Travel" },
 ];
 
-export function CreateNewsForm() {
+interface EditNewsFormProps {
+  newsId: string;
+}
+
+export function EditNewsForm({ newsId }: EditNewsFormProps) {
   const [formData, setFormData] = useState({
     title: "",
     excerpt: "",
@@ -45,6 +60,7 @@ export function CreateNewsForm() {
     category: "",
     image: "",
     slug: "",
+    status: "draft",
   });
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
@@ -53,12 +69,44 @@ export function CreateNewsForm() {
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [newsLoading, setNewsLoading] = useState(true);
   const router = useRouter();
 
   // Set mounted state untuk mencegah hydration error
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Fetch existing news data
+  useEffect(() => {
+    if (!mounted) return;
+
+    const fetchNewsData = async () => {
+      try {
+        setNewsLoading(true);
+        const response = await fetch(`/api/admin/news/${newsId}`);
+        if (!response.ok) throw new Error("Failed to fetch news");
+
+        const news: NewsData = await response.json();
+        setFormData({
+          title: news.title,
+          excerpt: news.excerpt,
+          content: news.content,
+          category: news.categoryId.toString(),
+          image: news.image || "",
+          slug: news.slug,
+          status: news.status,
+        });
+      } catch (error) {
+        toast.error("Gagal memuat data berita");
+        router.push("/admin/news");
+      } finally {
+        setNewsLoading(false);
+      }
+    };
+
+    fetchNewsData();
+  }, [mounted, newsId, router]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -146,8 +194,8 @@ export function CreateNewsForm() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/admin/news", {
-        method: "POST",
+      const response = await fetch(`/api/admin/news/${newsId}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -161,14 +209,14 @@ export function CreateNewsForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Gagal membuat berita");
+        throw new Error(data.error || "Gagal memperbarui berita");
       }
 
-      toast.success("Berita berhasil dipublikasikan");
+      toast.success("Berita berhasil diperbarui!");
       router.push("/admin/news");
     } catch (error: any) {
-      toast.error("Gagal mempublikasikan: " + error.message);
       console.error("Submit error:", error);
+      toast.error(error.message || "Terjadi kesalahan saat memperbarui berita");
     } finally {
       setLoading(false);
     }
@@ -177,7 +225,8 @@ export function CreateNewsForm() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleImageChange = (imageUrl: string) => {
@@ -223,7 +272,7 @@ export function CreateNewsForm() {
   };
 
   // Mencegah hydration error dengan conditional rendering
-  if (!mounted) {
+  if (!mounted || newsLoading) {
     return (
       <div className="space-y-6 max-w-4xl mx-auto">
         <div className="space-y-2">
@@ -258,6 +307,25 @@ export function CreateNewsForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
+      {/* Header dengan tombol kembali */}
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => router.back()}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Kembali
+        </Button>
+        <div>
+          <h2 className="text-xl font-semibold">Edit Berita</h2>
+          <p className="text-sm text-muted-foreground">
+            Perbarui informasi berita yang sudah ada
+          </p>
+        </div>
+      </div>
+
       {/* Judul Berita */}
       <div className="space-y-2">
         <Label htmlFor="title">Judul Berita*</Label>
@@ -272,8 +340,8 @@ export function CreateNewsForm() {
         />
       </div>
 
-      {/* Grid Kategori dan Gambar */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Grid Kategori, Status dan Gambar */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Kategori */}
         <div className="space-y-2">
           <Label htmlFor="category">Kategori*</Label>
@@ -353,6 +421,28 @@ export function CreateNewsForm() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Status */}
+        <div className="space-y-2">
+          <Label htmlFor="status">Status*</Label>
+          <Select
+            value={formData.status}
+            onValueChange={(value) =>
+              setFormData({ ...formData, status: value })
+            }
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih status..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Gambar */}
@@ -464,21 +554,18 @@ export function CreateNewsForm() {
         <Button type="button" variant="outline" onClick={() => router.back()}>
           Batal
         </Button>
-        <Button
-          type="submit"
-          disabled={loading || categoriesLoading}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
+        <Button type="submit" disabled={loading} className="min-w-[120px]">
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Memproses...
+              Memperbarui...
             </>
           ) : (
-            "Publikasi Berita"
+            "Perbarui Berita"
           )}
         </Button>
       </div>
     </form>
   );
 }
+
