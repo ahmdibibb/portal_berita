@@ -33,7 +33,7 @@ test.describe('Authentication Flow', () => {
 
         // STEP 3: Logout
         await page.goto('/api/auth/logout', { waitUntil: 'domcontentloaded' });
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(1000);
 
         // Verifikasi sudah logout - cek tombol "SIGN IN" muncul
         await expect(page.getByText('SIGN IN')).toBeVisible();
@@ -100,7 +100,7 @@ test.describe('Authentication Flow', () => {
         await page.click('button[type="submit"]');
 
         // Tunggu 3 detik
-        await page.waitForTimeout(3000);
+        await page.waitForTimeout(1000);
 
         // Harus tetap di halaman login
         await expect(page).toHaveURL(/.*\/auth\/login/);
