@@ -27,33 +27,19 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </h1>
           {query && (
             <p className="text-lg text-muted-foreground">
-              Menampilkan hasil untuk:{" "}
-              <span className="font-semibold text-foreground">
-                &ldquo;{query}&rdquo;
-              </span>
+              Menampilkan hasil untuk: <span className="font-semibold text-foreground">&quot;{query}&quot;</span>
             </p>
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Search Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <SearchFilters
-              currentCategory={category}
-              currentSort={sort}
-              searchQuery={query}
-            />
-          </div>
-
-          {/* Search Results */}
-          <div className="lg:col-span-3">
-            <SearchResults
-              query={query}
-              category={category}
-              sort={sort}
-              page={page}
-            />
-          </div>
+        {/* Search Results - Full Width */}
+        <div>
+          <SearchResults
+            query={query}
+            category={category}
+            sort={sort}
+            page={page}
+          />
         </div>
       </div>
     </div>

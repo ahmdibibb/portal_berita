@@ -14,6 +14,11 @@ import { toast } from "sonner";
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    general: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -21,6 +26,40 @@ export function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Reset errors
+    setErrors({
+      email: "",
+      password: "",
+      general: "",
+    });
+
+    // Client-side validation
+    let hasError = false;
+    const newErrors = {
+      email: "",
+      password: "",
+      general: "",
+    };
+
+    if (!email.trim()) {
+      newErrors.email = "Email harus diisi";
+      hasError = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Format email tidak valid";
+      hasError = true;
+    }
+
+    if (!password) {
+      newErrors.password = "Password harus diisi";
+      hasError = true;
+    }
+
+    if (hasError) {
+      setErrors(newErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -28,7 +67,11 @@ export function LoginForm() {
       toast.success("Berhasil masuk");
       router.push("/");
     } catch (error) {
-      toast.error("Gagal masuk");
+      setErrors({
+        email: "",
+        password: "",
+        general: "Email atau password salah. Silakan coba lagi.",
+      });
     } finally {
       setLoading(false);
     }
@@ -36,6 +79,12 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {errors.general && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-600">{errors.general}</p>
+        </div>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -43,9 +92,17 @@ export function LoginForm() {
           type="email"
           placeholder="nama@email.com"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (errors.email) {
+              setErrors((prev) => ({ ...prev, email: "" }));
+            }
+          }}
+          className={errors.email ? "border-red-500" : ""}
         />
+        {errors.email && (
+          <p className="text-sm text-red-600">{errors.email}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -56,8 +113,13 @@ export function LoginForm() {
             type={showPassword ? "text" : "password"}
             placeholder="Masukkan password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) {
+                setErrors((prev) => ({ ...prev, password: "" }));
+              }
+            }}
+            className={errors.password ? "border-red-500" : ""}
           />
           <Button
             type="button"
@@ -73,6 +135,9 @@ export function LoginForm() {
             )}
           </Button>
         </div>
+        {errors.password && (
+          <p className="text-sm text-red-600">{errors.password}</p>
+        )}
       </div>
 
       <Button type="submit" className="w-full pressable" disabled={loading}>

@@ -297,7 +297,7 @@ export function Header() {
                   size="sm"
                   className="bg-white text-blue-900 hover:bg-gray-100 shadow-sm px-4 py-2 font-medium pressable"
                 >
-                  <Link href="/auth/register">CREATE FREE ACCOUNT</Link>
+                  <Link href="/auth/register">SIGN UP</Link>
                 </Button>
               </div>
             )}

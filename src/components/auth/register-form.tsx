@@ -17,22 +17,80 @@ export function RegisterForm() {
     password: "",
     confirmPassword: "",
   });
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
+
+    // Clear error when user starts typing
+    if (errors[name as keyof typeof errors]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Reset errors
+    setErrors({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+
+    // Client-side validation
+    let hasError = false;
+    const newErrors = {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    };
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Nama harus diisi";
+      hasError = true;
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email harus diisi";
+      hasError = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Format email tidak valid";
+      hasError = true;
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password harus diisi";
+      hasError = true;
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password harus minimal 6 karakter, 1 huruf besar, 1 huruf kecil, dan 1 karakter spesial";
+      hasError = true;
+    }
+
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Password tidak cocok");
+      newErrors.confirmPassword = "Password tidak cocok";
+      hasError = true;
+    }
+
+    if (hasError) {
+      setErrors(newErrors);
       return;
     }
 
@@ -53,12 +111,24 @@ export function RegisterForm() {
       });
 
       if (response.ok) {
-        toast.success("Pendaftaran berhasil");
+        // Redirect FIRST before showing toast
         router.push("/auth/login");
+        // Then show success message
+        toast.success("Pendaftaran berhasil");
       } else {
-        throw new Error("Pendaftaran gagal");
+        const errorData = await response.json();
+        // Handle specific errors
+        if (errorData.error?.includes("Email sudah terdaftar")) {
+          setErrors((prev) => ({
+            ...prev,
+            email: "Email sudah terdaftar, silakan gunakan email lain",
+          }));
+        } else {
+          toast.error(errorData.error || "Pendaftaran gagal");
+        }
       }
     } catch (error) {
+      console.error("Registration error:", error);
       toast.error("Pendaftaran gagal");
     } finally {
       setLoading(false);
@@ -76,8 +146,11 @@ export function RegisterForm() {
           placeholder="Masukkan nama lengkap"
           value={formData.name}
           onChange={handleChange}
-          required
+          className={errors.name ? "border-red-500" : ""}
         />
+        {errors.name && (
+          <p className="text-sm text-red-600">{errors.name}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -89,8 +162,11 @@ export function RegisterForm() {
           placeholder="nama@email.com"
           value={formData.email}
           onChange={handleChange}
-          required
+          className={errors.email ? "border-red-500" : ""}
         />
+        {errors.email && (
+          <p className="text-sm text-red-600">{errors.email}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -103,7 +179,7 @@ export function RegisterForm() {
             placeholder="Masukkan password"
             value={formData.password}
             onChange={handleChange}
-            required
+            className={errors.password ? "border-red-500" : ""}
           />
           <Button
             type="button"
@@ -119,6 +195,9 @@ export function RegisterForm() {
             )}
           </Button>
         </div>
+        {errors.password && (
+          <p className="text-sm text-red-600">{errors.password}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -130,8 +209,11 @@ export function RegisterForm() {
           placeholder="Konfirmasi password"
           value={formData.confirmPassword}
           onChange={handleChange}
-          required
+          className={errors.confirmPassword ? "border-red-500" : ""}
         />
+        {errors.confirmPassword && (
+          <p className="text-sm text-red-600">{errors.confirmPassword}</p>
+        )}
       </div>
 
       <Button type="submit" className="w-full pressable" disabled={loading}>
